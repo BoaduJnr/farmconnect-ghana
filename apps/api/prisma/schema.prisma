@@ -1,0 +1,299 @@
+// FarmConnect Ghana schema — grows phase by phase per the build plan (section 8).
+// Landed so far: User (Phase 1), Listing (Phase 2), Order (Phase 3 — manual Mobile Money
+// reconciliation, not a payment gateway: the buyer transfers money directly to the seller's
+// momo number outside the app, then submits a transaction ID for the seller to confirm),
+// ChatMessage (Phase 4 — AI advisory chatbot, Gemini-backed),
+// PriceSnapshot/Notification/SmsInboundLog (Phase 5),
+// Rating/CoopGroup/CoopMember + admin verification/suspension + order disputes (Phase 6).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  FARMER
+  BUYER
+  EXTENSION
+  ADMIN
+}
+
+enum Locale {
+  en
+  tw
+}
+
+enum MomoProvider {
+  mtn
+  telecel
+  airteltigo
+}
+
+model User {
+  id          String   @id @default(cuid())
+  phone       String   @unique
+  role        Role
+  name        String?
+  locale      Locale   @default(en)
+  trustScore  Float    @default(0)
+  ratingCount Int      @default(0)
+  isVerified  Boolean  @default(false)
+  // Admin-set (FR-13) — a suspended account can't log in or refresh its session (existing
+  // access tokens still expire naturally; see auth.service.ts).
+  isSuspended Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Farmers must set these (enforced right after role selection, see plan) before they can
+  // list produce — this is the number/network/registered-name buyers send Mobile Money
+  // payments to directly. momoAccountName is the name on the momo account (as registered with
+  // the network), shown to buyers so they can confirm they're paying the right person.
+  momoProvider    MomoProvider?
+  momoPhone       String?
+  momoAccountName String?
+
+  listings        Listing[]
+  ordersAsBuyer   Order[]        @relation("OrdersAsBuyer")
+  ordersAsFarmer  Order[]        @relation("OrdersAsFarmer")
+  chatMessages    ChatMessage[]
+  notifications   Notification[]
+  ratingsGiven    Rating[]       @relation("RatingsGiven")
+  ratingsReceived Rating[]       @relation("RatingsReceived")
+  coopMembership  CoopMember?
+
+  @@map("users")
+}
+
+enum ListingStatus {
+  ACTIVE
+  PENDING
+  SOLD
+  REMOVED
+}
+
+model Listing {
+  id            String        @id @default(cuid())
+  farmer        User          @relation(fields: [farmerId], references: [id])
+  farmerId      String
+  cropType      String
+  quantityKg    Int
+  pricePerKg    Decimal       @db.Decimal(10, 2)
+  harvestDate   DateTime?
+  availableFrom DateTime      @default(now())
+  photos        String[]      @default([])
+  lat           Float
+  lng           Float
+  regionLabel   String
+  status        ListingStatus @default(ACTIVE)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  // Attributes an "aggregated" listing to the farmer's co-op group (FR-10) — null for an
+  // ordinary individual listing.
+  coop   CoopGroup? @relation(fields: [coopId], references: [id])
+  coopId String?
+
+  orders Order[]
+
+  @@index([farmerId])
+  @@index([cropType])
+  @@index([status])
+  @@index([coopId])
+  @@map("listings")
+}
+
+// Manual Mobile Money reconciliation state machine (no payment gateway):
+// pending -> payment_submitted -> paid -> delivered
+// payment_submitted -> payment_rejected -> payment_submitted (buyer can resubmit)
+// payment_rejected -> disputed -> paid | cancelled (buyer disputes, admin resolves — FR-13)
+// pending -> cancelled (buyer backs out before sending any money)
+enum OrderStatus {
+  pending
+  payment_submitted
+  payment_rejected
+  disputed
+  paid
+  delivered
+  cancelled
+}
+
+enum DisputeResolution {
+  uphold_payment
+  uphold_rejection
+}
+
+model Order {
+  id          String      @id @default(cuid())
+  listing     Listing     @relation(fields: [listingId], references: [id])
+  listingId   String
+  buyer       User        @relation("OrdersAsBuyer", fields: [buyerId], references: [id])
+  buyerId     String
+  farmer      User        @relation("OrdersAsFarmer", fields: [farmerId], references: [id])
+  farmerId    String
+  cropType    String
+  quantityKg  Int
+  pricePerKg  Decimal     @db.Decimal(10, 2)
+  subtotal    Decimal     @db.Decimal(10, 2)
+  deliveryFee Decimal     @default(15.00) @db.Decimal(10, 2)
+  total       Decimal     @db.Decimal(10, 2)
+  status      OrderStatus @default(pending)
+
+  // Snapshotted from the farmer's User row at order creation, so it stays correct even if
+  // the farmer later changes their momo details — this is what the buyer is told to pay to.
+  sellerMomoProvider    MomoProvider
+  sellerMomoPhone       String
+  sellerMomoAccountName String
+
+  // Filled in when the buyer submits proof of payment.
+  buyerMomoPhone      String?
+  transactionId       String?
+  paymentSubmittedAt  DateTime?
+  paymentRejectedNote String?
+
+  paidConfirmedAt     DateTime?
+  deliveryConfirmedAt DateTime?
+
+  // Buyer-raised dispute of a payment rejection, and its admin resolution (FR-13).
+  disputeReason       String?
+  disputeRaisedAt     DateTime?
+  disputeResolution   DisputeResolution?
+  disputeResolvedNote String?
+  disputeResolvedAt   DateTime?
+
+  ratings   Rating[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([buyerId])
+  @@index([farmerId])
+  @@index([listingId])
+  @@index([status])
+  @@map("orders")
+}
+
+// Post-delivery, both parties rate each other 1-5 stars (FR-08). One rating per (order, rater)
+// — enforced by the unique constraint below, since either side could otherwise submit twice.
+model Rating {
+  id        String   @id @default(cuid())
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String
+  rater     User     @relation("RatingsGiven", fields: [raterId], references: [id])
+  raterId   String
+  rated     User     @relation("RatingsReceived", fields: [ratedId], references: [id])
+  ratedId   String
+  stars     Int
+  comment   String?
+  createdAt DateTime @default(now())
+
+  @@unique([orderId, raterId])
+  @@index([ratedId])
+  @@map("ratings")
+}
+
+// Farmers pooling produce listings and negotiating as a unit (FR-10). Kept deliberately
+// simple: a farmer belongs to at most one co-op at a time (enforced by CoopMember.userId being
+// unique), joins via a short shareable code rather than an approval workflow.
+model CoopGroup {
+  id        String   @id @default(cuid())
+  name      String
+  joinCode  String   @unique
+  createdAt DateTime @default(now())
+
+  members  CoopMember[]
+  listings Listing[]
+
+  @@map("coop_groups")
+}
+
+enum CoopMemberRole {
+  LEADER
+  MEMBER
+}
+
+model CoopMember {
+  id       String         @id @default(cuid())
+  coop     CoopGroup      @relation(fields: [coopId], references: [id])
+  coopId   String
+  user     User           @relation(fields: [userId], references: [id])
+  userId   String         @unique
+  role     CoopMemberRole
+  joinedAt DateTime       @default(now())
+
+  @@index([coopId])
+  @@map("coop_members")
+}
+
+enum ChatRole {
+  user
+  assistant
+}
+
+// The AI advisory chatbot's conversation log — a flat per-user history (no separate
+// "session" concept; simplest thing that works for a single ongoing conversation per user).
+model ChatMessage {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  role      ChatRole
+  content   String
+  imageUrl  String?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@map("chat_messages")
+}
+
+// Seeded/simulated — no public Ghana Commodity Exchange API actually exists to integrate
+// with (see plan). A background tick perturbs prices periodically so this stays "live".
+model PriceSnapshot {
+  id         String   @id @default(cuid())
+  cropType   String
+  pricePerKg Decimal  @db.Decimal(10, 2)
+  recordedAt DateTime @default(now())
+
+  @@index([cropType, recordedAt])
+  @@map("price_snapshots")
+}
+
+enum NotificationType {
+  ORDER
+  PRICE
+  SYSTEM
+}
+
+enum NotificationChannel {
+  IN_APP
+  SMS
+}
+
+model Notification {
+  id        String              @id @default(cuid())
+  user      User                @relation(fields: [userId], references: [id])
+  userId    String
+  type      NotificationType
+  channel   NotificationChannel @default(IN_APP)
+  title     String
+  body      String
+  read      Boolean             @default(false)
+  createdAt DateTime            @default(now())
+
+  @@index([userId])
+  @@map("notifications")
+}
+
+// Audit trail for the SMS fallback channel (FR-11) — every inbound text and how it was
+// handled, regardless of whether the command was recognized.
+model SmsInboundLog {
+  id            String   @id @default(cuid())
+  fromPhone     String
+  rawText       String
+  parsedCommand String?
+  responseText  String
+  createdAt     DateTime @default(now())
+
+  @@map("sms_inbound_logs")
+}

@@ -1,0 +1,38 @@
+name: farmconnect-ghana
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: farmconnect
+      POSTGRES_PASSWORD: farmconnect
+      POSTGRES_DB: farmconnect
+    ports:
+      # Host port 5434 (not 5432) — this machine already has other Postgres
+      # containers bound to 5432/5433 for unrelated projects.
+      - '5434:5432'
+    volumes:
+      - farmconnect_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U farmconnect -d farmconnect']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - '6379:6379'
+    volumes:
+      - farmconnect_redis_data:/data
+    healthcheck:
+      test: ['CMD', 'redis-cli', 'ping']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  farmconnect_pg_data:
+  farmconnect_redis_data:

@@ -1,0 +1,30 @@
+{
+  "name": "farmconnect-ghana",
+  "private": true,
+  "version": "0.0.0",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "concurrently -n api,web -c blue,green \"npm run dev -w @farmconnect/api\" \"npm run dev -w @farmconnect/web\"",
+    "build": "npm run build -w @farmconnect/shared && npm run build -w @farmconnect/api && npm run build -w @farmconnect/web",
+    "test": "npm run test -w @farmconnect/shared && npm run test -w @farmconnect/api && npm run test -w @farmconnect/web",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write .",
+    "docker:up": "docker compose -f infra/docker-compose.yml up -d",
+    "docker:down": "docker compose -f infra/docker-compose.yml down",
+    "docker:logs": "docker compose -f infra/docker-compose.yml logs -f"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0",
+    "eslint": "^9.15.0",
+    "@eslint/js": "^9.15.0",
+    "typescript-eslint": "^8.15.0",
+    "prettier": "^3.3.3",
+    "typescript": "^5.6.3"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

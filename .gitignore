@@ -1,0 +1,28 @@
+node_modules/
+dist/
+build/
+.env
+.env.local
+*.local
+
+# prisma
+apps/api/generated/
+
+# uploaded photos (local disk storage for this phase — see plan for a future S3-compatible swap)
+apps/api/uploads/*
+!apps/api/uploads/.gitkeep
+
+# logs
+npm-debug.log*
+*.log
+
+# editor
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# os
+.DS_Store
+Thumbs.db
+
+# docker volumes are managed by docker, nothing local to ignore here

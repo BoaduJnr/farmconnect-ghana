@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: #f4f7f2;
+}
+
+.fc-scroll::-webkit-scrollbar {
+  display: none;
+}
+.fc-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
