@@ -1,0 +1,450 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FarmConnect Ghana — Software Requirements Specification</title>
+<link rel="stylesheet" href="assets/report.css">
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<section class="cover">
+  <div>
+    <div class="brandmark"><span class="dot">FC</span><span class="name">FarmConnect Ghana</span></div>
+    <div class="kicker">Software Requirements Specification</div>
+    <h1 class="doctitle">Software Requirements<br>Specification</h1>
+    <div class="docsubtitle">FarmConnect Ghana — A Mobile-First Marketplace Connecting Ghanaian Smallholder Farmers to Buyers, Market Prices, and Agricultural Advisory Services</div>
+    <p class="lede">Conforms to the IEEE Std 830-1998 recommended practice for Software Requirements Specifications. Version 2.0 reconciles the original requirements baseline with the delivered, deployed system and records every approved scope deviation with its engineering rationale.</p>
+  </div>
+  <table class="meta-table">
+    <tr><td class="k">Course</td><td class="v">CSCD602 — Advanced Software Engineering, Capstone Project</td></tr>
+    <tr><td class="k">Institution</td><td class="v">University of Ghana — Department of Computer Science</td></tr>
+    <tr><td class="k">Group</td><td class="v">Angry Nerds</td></tr>
+    <tr><td class="k">Project title</td><td class="v">FarmConnect Ghana</td></tr>
+    <tr><td class="k">Document version</td><td class="v">2.0 (post-implementation reconciliation)</td></tr>
+    <tr><td class="k">Date</td><td class="v">12 August 2026</td></tr>
+    <tr><td class="k">Individual submission by</td><td class="v">George Boadu Junior — 22427354</td></tr>
+  </table>
+  <div class="footer-block">This individual submission is prepared by George Boadu Junior on behalf of Group Angry Nerds, per the CSCD602 individual-submission requirement. See "Group Information" overleaf for the full roster.</div>
+</section>
+
+<!-- ============ GROUP INFO ============ -->
+<section class="section">
+<div class="runhead">FarmConnect Ghana · Software Requirements Specification</div>
+<h1>Group Information &amp; Revision History</h1>
+
+<h2>Group Information</h2>
+<table class="roster">
+<thead><tr><th>#</th><th>Group member</th><th>Student ID</th><th>Major contribution</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>George Boadu Junior</strong> (this submission)</td><td>22427354</td><td>Requirements engineering &amp; SRS authorship, system architecture &amp; design, full-stack implementation (API + PWA), test authoring/execution, deployment engineering, and project documentation.</td></tr>
+<tr><td>2</td><td>Marvin Kabutey</td><td>22425067</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>3</td><td>Obed Borley Obuadey</td><td>22424177</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>4</td><td>Richmond Gakpetor</td><td>22424720</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>5</td><td>Isichei Phelim</td><td>22424142</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>6</td><td>Edem Afflu</td><td>22424139</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>7</td><td>Emmanuel Okyere Gyateng</td><td>22424179</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>8</td><td>Edinam Ahadzie</td><td>22424539</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>9</td><td>Desmond Techie</td><td>22424555</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>10</td><td>Irene Hamilton</td><td>22424758</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>11</td><td>Bernard Tetteh Djangbah</td><td>22424329</td><td><em>[Confirm with group before final submission]</em></td></tr>
+</tbody>
+</table>
+<div class="callout note"><span class="label">Note on individual submission</span>Every group member must submit this same core package individually through SAKAI LMS, editing the "major contribution" column and any first-person passages to reflect their own role and understanding, per the CSCD602 Individual Submission Requirement.</div>
+
+<h2>Revision History</h2>
+<table class="plain">
+<thead><tr><th>Date</th><th>Version</th><th>Author(s)</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>May 2026</td><td>1.0</td><td>Group Angry Nerds</td><td>Initial complete SRS for FarmConnect Ghana, drafted before implementation began.</td></tr>
+<tr><td>12 Aug 2026</td><td>2.0</td><td>George Boadu Junior (Group Angry Nerds)</td><td>Post-implementation reconciliation: added a Status column to every FR/NFR, corrected the architecture description to match the delivered stack, and added Section 10 documenting every approved deviation between v1.0 and the shipped system, with rationale.</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ============ TOC ============ -->
+<section class="section">
+<h1>Table of Contents</h1>
+<ul class="toc">
+<li><span class="num">1</span><a href="#s1">Introduction</a></li>
+<li><span class="num">2</span><a href="#s2">Overall Description</a></li>
+<li><span class="num">3</span><a href="#s3">Functional Requirements</a></li>
+<li><span class="num">4</span><a href="#s4">Non-Functional Requirements</a></li>
+<li><span class="num">5</span><a href="#s5">External Interface Requirements</a></li>
+<li><span class="num">6</span><a href="#s6">Other Requirements / Constraints</a></li>
+<li><span class="num">7</span><a href="#s7">System Architecture Overview</a></li>
+<li><span class="num">8</span><a href="#s8">Use Case Scenarios</a></li>
+<li><span class="num">9</span><a href="#s9">Traceability &amp; Reconciliation with the Delivered System</a></li>
+<li><span class="num">10</span><a href="#s10">Appendices</a></li>
+</ul>
+</section>
+
+<!-- ============ 1. INTRODUCTION ============ -->
+<section class="section" id="s1">
+<div class="runhead">FarmConnect Ghana · SRS</div>
+<h1>1. Introduction</h1>
+
+<h2>1.1 Purpose</h2>
+<p>This Software Requirements Specification (SRS) defines the functional and non-functional requirements for FarmConnect Ghana, a mobile-first web platform designed to connect smallholder farmers in Ghana directly with verified buyers and agricultural advisory services. It is the authoritative reference for the design, implementation, testing, and acceptance of the system, and is written to guide both the development team (Group Angry Nerds) and the course evaluators reviewing this capstone project. Version 2.0 additionally reconciles this baseline against the system that was actually designed, built, tested, and deployed (see Section 9).</p>
+
+<h2>1.2 Scope</h2>
+<p>FarmConnect Ghana is a system covering the following capabilities:</p>
+<ul>
+<li>User registration, authentication, and role-based profiles (Farmer, Buyer, Administrator; Extension Officer reserved — see 9.3).</li>
+<li>Creation, browsing, and management of produce listings, including photos, quantity, price, harvest date, and GPS location.</li>
+<li>Order placement, confirmation, and tracking between farmers and buyers, including a manual Mobile Money payment-reconciliation workflow (see 9.1).</li>
+<li>A live market price dashboard.</li>
+<li>An AI-powered advisory chatbot for crop guidance, weather context, and photo-based pest identification.</li>
+<li>SMS fallback channels for users on feature phones or with limited data access.</li>
+<li>Trust and rating mechanisms for completed transactions, and cooperative (co-op) group formation.</li>
+<li>An administrator portal for account verification, listing moderation, and payment-dispute resolution.</li>
+</ul>
+<p>The system explicitly excludes: direct logistics/delivery dispatch management, crop insurance underwriting, and government subsidy administration, which remain candidates for future phases (see the companion <em>Maintenance &amp; Future Evolution Plan</em>).</p>
+
+<h2>1.3 Intended Audience and Use</h2>
+<ul>
+<li><strong>Development team</strong> (Group Angry Nerds) — as the basis for system design and implementation.</li>
+<li><strong>Course instructors and evaluators</strong> — to assess requirements completeness and engineering rigor.</li>
+<li><strong>Future maintainers</strong> — as a reference for system behaviour and constraints.</li>
+<li><strong>Potential pilot partners</strong> (e.g., agricultural extension officers, NGOs) — to understand system capabilities.</li>
+</ul>
+
+<h2>1.4 Product Scope and Business Context</h2>
+<p>Ghana has over 2.7 million smallholder farmers, many of whom lack reliable access to buyers, fair pricing information, and post-harvest support. Middlemen currently capture up to 60% of potential profit margins, and post-harvest losses reach 30–40% due to farmers' inability to sell produce before spoilage. FarmConnect Ghana addresses this gap with a low-cost, accessible digital marketplace tailored to the Ghanaian context — including support for low-end Android devices, SMS access, and local-language (Twi) support.</p>
+
+<h2>1.5 Definitions, Acronyms, and Abbreviations</h2>
+<table class="plain">
+<tbody>
+<tr><td><strong>Farmer</strong></td><td>A registered seller of agricultural produce on the platform.</td></tr>
+<tr><td><strong>Buyer</strong></td><td>A registered purchaser of produce, from individual consumers to wholesalers.</td></tr>
+<tr><td><strong>Listing</strong></td><td>An individual produce post created by a farmer: crop type, quantity, price, and location.</td></tr>
+<tr><td><strong>MoMo</strong></td><td>Mobile Money — a mobile-based payment method offered by telecom providers (MTN, Telecel, AirtelTigo).</td></tr>
+<tr><td><strong>OTP</strong></td><td>One-Time Password, used for phone-based authentication.</td></tr>
+<tr><td><strong>SRS / FR / NFR</strong></td><td>Software Requirements Specification / Functional Requirement / Non-Functional Requirement.</td></tr>
+<tr><td><strong>PWA</strong></td><td>Progressive Web App — an installable, offline-capable web application.</td></tr>
+<tr><td><strong>JWT</strong></td><td>JSON Web Token — signed token format used for session authentication.</td></tr>
+<tr><td><strong>Co-op</strong></td><td>A cooperative group of farmers who can jointly attribute listings to the group.</td></tr>
+<tr><td><strong>Twi (Akan)</strong></td><td>A widely spoken local language in Ghana, supported as an alternate UI language.</td></tr>
+</tbody>
+</table>
+
+<h2>1.6 References</h2>
+<ul>
+<li>IEEE Std 830-1998, <em>IEEE Recommended Practice for Software Requirements Specifications</em>.</li>
+<li>MTN Mobile Money, Telecel Cash, and AirtelTigo Money — public product documentation (payment flows referenced for the manual-reconciliation design, §9.1).</li>
+<li>Google Gemini API documentation (<code class="inline">gemini-flash-latest</code>) — <a href="https://ai.google.dev">ai.google.dev</a>.</li>
+<li>OpenWeatherMap Current Weather API documentation — <a href="https://openweathermap.org/api">openweathermap.org/api</a>.</li>
+<li>Africa's Talking SMS API documentation (inbound webhooks) — <a href="https://africastalking.com">africastalking.com</a>.</li>
+<li>GiantSMS API documentation (outbound SMS, Ghana) — <a href="https://giantsms.com">giantsms.com</a>.</li>
+<li>FarmConnect Ghana project presentation, Group Angry Nerds, May 2026.</li>
+</ul>
+
+<h2>1.7 Document Overview</h2>
+<p>Section 2 describes product context, user classes, and operating environment. Section 3 specifies functional requirements. Section 4 specifies non-functional requirements. Section 5 describes external interface requirements. Section 6 lists constraints and assumptions. Section 7 summarises the architecture (detailed diagrams live in the companion <em>Design Documentation</em>). Section 8 lists use-case scenarios. Section 9 — new in v2.0 — reconciles every requirement against what was actually delivered. Section 10 holds appendices, including AI-assisted drafting disclosures.</p>
+</section>
+
+<!-- ============ 2. OVERALL DESCRIPTION ============ -->
+<section class="section" id="s2">
+<div class="runhead">FarmConnect Ghana · SRS</div>
+<h1>2. Overall Description</h1>
+
+<h2>2.1 Product Perspective</h2>
+<p>FarmConnect Ghana is a new, standalone system composed of a mobile-first Progressive Web App frontend, a backend REST API (Node.js/Express, TypeScript), and a data layer (PostgreSQL with Redis caching). It integrates with four external systems: an SMS gateway pair for outbound and inbound feature-phone messaging, an AI large-language-model provider for the advisory chatbot, and a weather data provider used to ground advisory answers. <em>It does not integrate with a Mobile Money payment gateway</em> — see §9.1 for the rationale and the manual-reconciliation design that replaces it.</p>
+
+<h2>2.2 Product Functions</h2>
+<ul>
+<li><strong>Farmer Marketplace</strong> — listing creation with photos, quantity, price, and location; buyer browsing and ordering.</li>
+<li><strong>SMS + App Access</strong> — dual-channel access for smartphone and feature-phone users.</li>
+<li><strong>Live Market Prices</strong> — a continuously updating commodity price feed.</li>
+<li><strong>Advisory Chatbot</strong> — an AI-powered assistant for weather, pest, and crop-practice guidance, including photo-based pest identification.</li>
+<li><strong>Order Alerts</strong> — in-app and SMS notifications for orders and price changes.</li>
+<li><strong>Co-op Groups</strong> — farmer cooperatives that can jointly attribute listings to the group.</li>
+<li><strong>Ratings &amp; Trust</strong> — a 1–5 star mutual rating system feeding a per-user trust score.</li>
+<li><strong>Administration</strong> — account verification/suspension, listing moderation, and payment-dispute resolution.</li>
+</ul>
+
+<h2>2.3 User Classes and Characteristics</h2>
+<table>
+<thead><tr><th>User class</th><th>Characteristics</th></tr></thead>
+<tbody>
+<tr><td><strong>Farmer</strong> (primary)</td><td>Smallholder producer; may use a feature phone (SMS) or a low-end smartphone; varying literacy; primary language often Twi. Must link Mobile Money details before publishing listings.</td></tr>
+<tr><td><strong>Buyer</strong> (primary)</td><td>Individual consumer, retailer, or wholesaler; typically more comfortable with a smartphone; needs search, filtering, and trust signals before paying a stranger directly.</td></tr>
+<tr><td><strong>Administrator</strong></td><td>Platform operator; verifies/suspends accounts, moderates listings, and arbitrates payment disputes. Seeded out-of-band (no self-service admin signup — see §9.3).</td></tr>
+<tr><td><strong>Agricultural Extension Officer</strong> (reserved)</td><td>Named as a role in the original v1.0 baseline; the role constant exists in the data model but has no implemented routes, guards, or UI in the delivered system — a deferred, not a dropped, requirement (§9.3).</td></tr>
+</tbody>
+</table>
+
+<h2>2.4 Operating Environment</h2>
+<ul>
+<li><strong>Client:</strong> Android/iOS smartphones (including low-RAM devices) via an installable Progressive Web App running in any modern mobile browser; basic feature phones via the SMS gateway.</li>
+<li><strong>Server:</strong> A containerisable Node.js/Express application server, deployable to any Node-compatible host (see the <em>Deployment</em> section of the Project Documentation).</li>
+<li><strong>Database:</strong> PostgreSQL 16 (primary data store) with Redis 7 (OTP storage, rate limiting, refresh-token allowlist, weather-cache).</li>
+<li><strong>Network:</strong> Optimised for 3G connectivity typical of rural Ghana; offline-tolerant for previously-seen read data via Workbox service-worker caching.</li>
+</ul>
+
+<h2>2.5 Design and Implementation Constraints</h2>
+<ul>
+<li>Must operate acceptably on 3G networks and devices with limited RAM/storage.</li>
+<li>No card or Mobile Money credentials may be stored on the platform — payment handling is a manual, human-verified hand-off (§9.1), not a stored-credential flow.</li>
+<li>UI must support English and Twi (Akan) at minimum, with a runtime language toggle.</li>
+<li>All critical farmer actions (listing produce, confirming payment) must have a working SMS fallback path with no smartphone required.</li>
+</ul>
+
+<h2>2.6 User Documentation</h2>
+<p>The system provides in-app onboarding screens, a bilingual UI, and an SMS <code class="inline">HELP</code> command for feature-phone users. The companion <em>User Manual</em> (submitted alongside this SRS) is the full end-user reference for every role.</p>
+
+<h2>2.7 Assumptions and Dependencies</h2>
+<ul>
+<li>Assumes continued availability of the configured SMS gateway (GiantSMS outbound / Africa's Talking inbound), the Gemini API, and the OpenWeatherMap API — each degrades independently and predictably if unavailable (see §4.2, §9.2, §9.4).</li>
+<li>Assumes farmers and buyers possess a phone number capable of receiving SMS/OTP.</li>
+<li>Assumes buyers and farmers are willing to complete the Mobile Money leg of a transaction directly with each other, outside the app, and to act honestly when confirming/disputing a payment (the trust model underpinning §9.1).</li>
+<li>Assumes target pilot regions have at least intermittent 2G/3G mobile network coverage.</li>
+</ul>
+</section>
+
+<!-- ============ 3. FUNCTIONAL REQUIREMENTS ============ -->
+<section class="section" id="s3">
+<div class="runhead">FarmConnect Ghana · SRS</div>
+<h1>3. Functional Requirements</h1>
+<p>Each requirement is uniquely identified (FR-XX) for traceability to design, test cases, and the delivered code. The <strong>Status</strong> column (new in v2.0) records how the requirement was actually realised; every "Approved deviation" is explained in full in Section 9.</p>
+
+<table>
+<thead><tr><th style="width:7%">ID</th><th style="width:16%">Requirement</th><th>Description</th><th style="width:15%">Status</th></tr></thead>
+<tbody>
+<tr><td>FR-01</td><td>Authentication &amp; Registration</td><td>The system shall allow users to register via phone number with OTP verification, and to select a role (Farmer or Buyer) during onboarding. Returning users shall log in using their verified phone number and OTP, and shall remain signed in via a session token.</td><td>✅ As specified</td></tr>
+<tr><td>FR-02</td><td>Produce Listings</td><td>Farmers shall create, edit, and remove produce listings, specifying crop type, quantity (kg), price per kg, harvest/availability date, one or more photos, and GPS location. Listings shall be marked Active, Pending, Sold, or Removed.</td><td>✅ As specified</td></tr>
+<tr><td>FR-03</td><td>Search &amp; Filtering</td><td>Buyers shall search and filter listings by crop type/category, free text, price range, and geographic radius.</td><td>⚠️ Partial — voice-input search from v1.0 was not built (§9.5)</td></tr>
+<tr><td>FR-04</td><td>Order Placement &amp; Confirmation</td><td>Buyers shall place an order against a listing. The system shall notify the farmer via in-app and SMS alert; the order proceeds through an explicit, auditable status lifecycle from placement to delivery confirmation.</td><td>✅ As specified</td></tr>
+<tr><td>FR-05</td><td>Payments (Mobile Money)</td><td>The system shall support Mobile Money-based payment from buyer to farmer, with the platform never taking custody of funds, and a defined process for the farmer to confirm or reject a claimed payment.</td><td>🔁 Approved deviation — manual reconciliation replaces gateway escrow (§9.1)</td></tr>
+<tr><td>FR-06</td><td>Live Market Prices</td><td>The system shall display commodity prices on a dedicated price dashboard, refreshed at a defined interval.</td><td>🔁 Approved deviation — own simulated feed replaces a GCX API integration (§9.2)</td></tr>
+<tr><td>FR-07</td><td>AI Advisory Chatbot</td><td>The system shall provide an AI chatbot for crop advice, weather-aware guidance, and pest identification via photo upload.</td><td>🔁 Approved deviation — Google Gemini replaces the originally-implied provider (§9.4)</td></tr>
+<tr><td>FR-08</td><td>Ratings &amp; Trust Scores</td><td>The system shall allow both farmers and buyers to rate each completed transaction on a 1–5 star scale, and shall aggregate ratings into a visible trust score per user.</td><td>✅ As specified (design detailed in §9.6)</td></tr>
+<tr><td>FR-09</td><td>Notifications</td><td>The system shall send in-app and SMS notifications for order-lifecycle events and administrator actions.</td><td>✅ As specified</td></tr>
+<tr><td>FR-10</td><td>Cooperative (Co-op) Groups</td><td>The system shall allow farmers to create or join cooperative groups, enabling listings to be attributed to the group.</td><td>✅ Implemented (scoped down from "joint negotiation" to attribution + leadership transfer — §9.6)</td></tr>
+<tr><td>FR-11</td><td>SMS Fallback Channel</td><td>The system shall provide an SMS command interface allowing feature-phone users to register, link Mobile Money, list produce, check prices, view orders, and confirm payments without a smartphone app.</td><td>✅ As specified</td></tr>
+<tr><td>FR-12</td><td>Multilingual Support</td><td>The system shall present its UI in English and Twi (Akan), with a visible language toggle and language selection during onboarding.</td><td>✅ As specified (farmer/buyer UI only — admin portal is English-only by design, §9.7)</td></tr>
+<tr><td>FR-13</td><td>Administration &amp; Moderation</td><td>Administrators shall verify/suspend accounts, moderate fraudulent listings, and resolve disputes raised between transacting parties.</td><td>✅ Implemented (concrete workflow designed in §9.3, since v1.0 specified only the intent)</td></tr>
+<tr><td>FR-14 <span class="pill post">new</span></td><td>Payment Dispute Resolution</td><td>When a buyer disputes a rejected payment, the system shall route the dispute to an administrator, who shall resolve it by upholding the payment (order proceeds) or upholding the rejection (order cancels, listing reopens); both parties shall be notified of the outcome.</td><td>✅ Added in v2.0 — the concrete mechanism needed once FR-05's manual reconciliation was adopted (§9.1)</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ============ 4. NON-FUNCTIONAL ============ -->
+<section class="section" id="s4">
+<div class="runhead">FarmConnect Ghana · SRS</div>
+<h1>4. Non-Functional Requirements</h1>
+
+<h2>4.1 Performance</h2>
+<table>
+<thead><tr><th style="width:10%">ID</th><th>Requirement</th><th style="width:22%">Status</th></tr></thead>
+<tbody>
+<tr><td>NFR-P1</td><td>Page load time shall not exceed 3 seconds on a typical 3G network connection.</td><td>✅ Met — Workbox precache + code-split PWA shell; see Testing Report §Performance</td></tr>
+<tr><td>NFR-P2</td><td>The system shall support at least 10,000 concurrent users without service degradation.</td><td>⚠️ Not load-tested at this scale — capstone-scope limitation (§9.8), architecture is horizontally scalable</td></tr>
+<tr><td>NFR-P3</td><td>API response time shall not exceed 500 ms for the 95th percentile of requests.</td><td>✅ Met in local/staging measurement — see Testing Report</td></tr>
+</tbody>
+</table>
+
+<h2>4.2 Security</h2>
+<table>
+<thead><tr><th style="width:10%">ID</th><th>Requirement</th><th style="width:22%">Status</th></tr></thead>
+<tbody>
+<tr><td>NFR-S1</td><td>All client-server traffic shall be encrypted end-to-end using HTTPS/TLS.</td><td>✅ Enforced at the hosting layer (deployment guide, Project Documentation §Deployment)</td></tr>
+<tr><td>NFR-S2</td><td>The system shall use JWT-based authentication, with short-lived access tokens and a revocable refresh mechanism.</td><td>✅ Met — 12h access / 30-day single-use, rotating refresh tokens via a Redis allowlist (Design Documentation §Auth Sequence)</td></tr>
+<tr><td>NFR-S3</td><td>No card or Mobile Money credentials shall be stored on FarmConnect servers.</td><td>✅ Met by construction — the platform never touches payment credentials (§9.1)</td></tr>
+</tbody>
+</table>
+
+<h2>4.3 Usability</h2>
+<table>
+<thead><tr><th style="width:10%">ID</th><th>Requirement</th><th style="width:22%">Status</th></tr></thead>
+<tbody>
+<tr><td>NFR-U1</td><td>The application shall be usable on Android 6.0+ devices, including low-RAM/low-storage handsets.</td><td>✅ Met — plain PWA, no native runtime overhead</td></tr>
+<tr><td>NFR-U2</td><td>All critical actions (listing produce, confirming payment) shall have a functioning SMS fallback path.</td><td>✅ Met — see FR-11</td></tr>
+<tr><td>NFR-U3</td><td>The UI shall support English and Twi with accessible labels and a minimum 48dp tap target.</td><td>✅ Met — full i18n + accessibility pass (Phase 7, see Testing Report §Usability/Accessibility)</td></tr>
+</tbody>
+</table>
+
+<h2>4.4 Reliability &amp; Availability</h2>
+<table>
+<thead><tr><th style="width:10%">ID</th><th>Requirement</th><th style="width:22%">Status</th></tr></thead>
+<tbody>
+<tr><td>NFR-R1</td><td>The system shall maintain a 99.5% uptime SLA, excluding scheduled maintenance windows.</td><td>⚠️ Aspirational at capstone scale — see Maintenance &amp; Evolution Plan §Preventive Maintenance</td></tr>
+<tr><td>NFR-R2</td><td>The system shall perform automatic daily backups, retained for a minimum of 30 days.</td><td>⚠️ Depends on chosen host's managed-Postgres backup policy — documented per-provider in the Deployment Guide</td></tr>
+<tr><td>NFR-R3</td><td>Core read-only features shall degrade gracefully and remain partially usable offline or under poor connectivity.</td><td>✅ Met — Workbox <code class="inline">NetworkFirst</code>/<code class="inline">CacheFirst</code> runtime caching + offline banner (Phase 7)</td></tr>
+</tbody>
+</table>
+
+<h2>4.5 Maintainability &amp; Portability</h2>
+<table>
+<thead><tr><th style="width:10%">ID</th><th>Requirement</th><th style="width:22%">Status</th></tr></thead>
+<tbody>
+<tr><td>NFR-M1</td><td>The backend shall be organised into clearly separated modules (Auth, Listings, Orders, Prices, Advisory, Notifications, Co-ops, Admin, SMS Gateway) to simplify maintenance and future extraction into independent services.</td><td>✅ Met — module-per-domain layout, see Design Documentation §Component View</td></tr>
+<tr><td>NFR-M2</td><td>The frontend shall run on modern mobile browsers without requiring app-store installation.</td><td>✅ Met — installable PWA</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ============ 5. EXTERNAL INTERFACES ============ -->
+<section class="section" id="s5">
+<div class="runhead">FarmConnect Ghana · SRS</div>
+<h1>5. External Interface Requirements</h1>
+
+<h2>5.1 User Interfaces</h2>
+<ul>
+<li>Mobile-first responsive Progressive Web App covering Onboarding/Login/OTP, Role Selection, Farmer Home/Listings/Momo-Setup, Buyer Marketplace/Checkout, Orders &amp; Payment Submission, Advisory Chat, Prices, Notifications, Profile, and a separate Admin Portal (Users/Listings/Disputes).</li>
+<li>SMS text-command interface for feature-phone users: <code class="inline">HELP</code>, <code class="inline">REG</code>, <code class="inline">MOMO</code>, <code class="inline">LIST</code>, <code class="inline">PRICE</code>, <code class="inline">ORDERS</code>, <code class="inline">CONFIRM</code>.</li>
+</ul>
+
+<h2>5.2 Hardware Interfaces</h2>
+<ul>
+<li>Device camera — for produce photo capture and pest-identification photo uploads.</li>
+<li>Device GPS/location services — for listing geolocation, buyer distance-based search, and weather-context lookups.</li>
+</ul>
+
+<h2>5.3 Software Interfaces</h2>
+<table>
+<thead><tr><th>Interface</th><th>Purpose</th></tr></thead>
+<tbody>
+<tr><td>Google Gemini API (<code class="inline">gemini-flash-latest</code>)</td><td>Text advisory answers and vision-based pest/disease photo identification.</td></tr>
+<tr><td>OpenWeatherMap Current Weather API</td><td>Supplies weather context folded into advisory chatbot answers (Redis-cached ~45 min).</td></tr>
+<tr><td>GiantSMS API</td><td>Outbound SMS — OTP codes, order/admin notifications, SMS-command replies.</td></tr>
+<tr><td>Africa's Talking inbound webhook</td><td>Delivers inbound feature-phone SMS commands to <code class="inline">POST /api/sms/inbound</code>.</td></tr>
+</tbody>
+</table>
+<div class="callout deviation"><span class="label">Deviation from v1.0</span>v1.0 named a single "MTN MoMo / AirtelTigo Money API" and a single "GCX API" as software interfaces for automated payment and pricing. Neither is integrated in the delivered system — see §9.1 and §9.2.</div>
+
+<h2>5.4 Communication Interfaces</h2>
+<ul>
+<li>HTTPS REST API (JSON) for all client-server requests.</li>
+<li>SMS protocol via the two telecom gateway partners above, for feature-phone communication.</li>
+</ul>
+<div class="callout deviation"><span class="label">Deviation from v1.0</span>v1.0 specified WebSocket connections for real-time order/price updates. The delivered system uses REST polling (React Query, 30s stale-time) plus an in-app notification inbox instead — sufficient at this scale and considerably simpler to operate reliably on constrained mobile networks; a WebSocket/push upgrade is listed as a future enhancement (Maintenance &amp; Evolution Plan §Scalability).</div>
+</section>
+
+<!-- ============ 6. CONSTRAINTS ============ -->
+<section class="section" id="s6">
+<div class="runhead">FarmConnect Ghana · SRS</div>
+<h1>6. Other Requirements / Constraints</h1>
+
+<h2>6.1 Regulatory Constraints</h2>
+<ul>
+<li>The manual Mobile Money hand-off is designed to avoid, not comply with, Bank of Ghana e-money issuer/PSP licensing requirements — FarmConnect never takes custody of funds, so it does not act as a payment service provider (this was the deciding factor behind the §9.1 deviation, not merely an engineering convenience).</li>
+<li>User data handling is designed with Ghana's Data Protection Act, 2012 (Act 843) in mind: phone numbers and Mobile Money details are collected only for their stated purpose, and there is no card-data storage of any kind.</li>
+</ul>
+
+<h2>6.2 Project Constraints</h2>
+<ul>
+<li>Delivered as a capstone project within a single academic semester; scope is bounded by Section 3.</li>
+<li>Engineering judgement (documented in Section 9) was exercised wherever v1.0 specified an integration this team could not obtain production access to within the project timeline (a real MoMo merchant API, a real GCX feed) or where the SRS was silent on implementation detail (co-ops, admin, ratings).</li>
+</ul>
+
+<h2>6.3 Assumptions</h2>
+<ul>
+<li>Target pilot region(s) have at least intermittent mobile network coverage sufficient for SMS and occasional 3G data.</li>
+<li>Farmers and buyers possess a phone number capable of receiving OTP and SMS messages.</li>
+<li>Buyers and farmers will act in good faith on the manual Mobile Money hand-off, with the dispute-resolution workflow (FR-14) as the backstop when they don't.</li>
+</ul>
+</section>
+
+<!-- ============ 7. ARCHITECTURE OVERVIEW ============ -->
+<section class="section" id="s7">
+<div class="runhead">FarmConnect Ghana · SRS</div>
+<h1>7. System Architecture Overview</h1>
+<p>The system follows a three-tier architecture. Full architecture, component, and deployment diagrams are provided in the companion <em>Design Documentation</em> — this section summarises the tiers for requirements traceability.</p>
+<table>
+<thead><tr><th>Layer</th><th>Components</th></tr></thead>
+<tbody>
+<tr><td>Frontend</td><td>Vite + React + TypeScript Progressive Web App — Farmer UI, Buyer UI, Admin Portal, bilingual (EN/Twi), offline-caching via Workbox.</td></tr>
+<tr><td>Backend</td><td>Node.js / Express (TypeScript) REST API — Auth, Users, Listings, Orders, Prices, Advisory, Notifications, Co-ops, Admin, SMS-Gateway, Uploads modules.</td></tr>
+<tr><td>Data / External</td><td>PostgreSQL 16 (primary store, via Prisma ORM), Redis 7 (cache/session/rate-limit), Google Gemini (AI advisory), OpenWeatherMap (weather context), GiantSMS (outbound SMS), Africa's Talking (inbound SMS webhook).</td></tr>
+</tbody>
+</table>
+<div class="callout deviation"><span class="label">Deviation from v1.0</span>v1.0 named the frontend "React Native" and implied a native mobile build. The delivered frontend is a plain React web PWA (Vite + TypeScript) — installable and offline-capable without native tooling or app-store distribution, which better fits a project of this scope and the low-end-Android/no-app-store-friction target audience. See §9.7.</div>
+</section>
+
+<!-- ============ 8. USE CASES ============ -->
+<section class="section" id="s8">
+<div class="runhead">FarmConnect Ghana · SRS</div>
+<h1>8. Use Case Scenarios</h1>
+<p>Full actor/use-case diagrams and step-by-step flows are provided in the Design Documentation. Summarised here for requirements traceability:</p>
+<table>
+<thead><tr><th style="width:14%">Use case</th><th style="width:14%">Actor(s)</th><th>Description</th></tr></thead>
+<tbody>
+<tr><td>UC-01 List Produce</td><td>Farmer</td><td>Farmer completes Mobile Money onboarding, then creates a listing with crop details, photos, and location; publishes it to the marketplace.</td></tr>
+<tr><td>UC-02 Search &amp; Order</td><td>Buyer</td><td>Buyer searches/filters listings, views a farmer's profile and trust score, and places an order.</td></tr>
+<tr><td>UC-03 Pay &amp; Confirm</td><td>Buyer, Farmer</td><td>Buyer pays the farmer directly via Mobile Money and submits a transaction ID; farmer confirms or rejects it against their own Mobile Money history; buyer confirms delivery on receipt.</td></tr>
+<tr><td>UC-04 Get Crop Advice</td><td>Farmer, Buyer</td><td>User opens the advisory chatbot, optionally uploads a photo of a crop/pest issue, and receives a weather-aware answer.</td></tr>
+<tr><td>UC-05 Form a Co-op</td><td>Farmer</td><td>Farmers create or join a cooperative via a short join code to pool listings under a shared identity.</td></tr>
+<tr><td>UC-06 Resolve a Dispute <span class="pill post">new</span></td><td>Buyer, Farmer, Admin</td><td>Buyer disputes a rejected payment; an administrator reviews evidence and resolves it, notifying both parties.</td></tr>
+<tr><td>UC-07 Moderate the Platform <span class="pill post">new</span></td><td>Admin</td><td>Administrator verifies/suspends accounts and force-moderates listings reported as fraudulent.</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ============ 9. RECONCILIATION ============ -->
+<section class="section" id="s9">
+<div class="runhead">FarmConnect Ghana · SRS</div>
+<h1>9. Traceability &amp; Reconciliation with the Delivered System</h1>
+<p>This section is the single most important addition in v2.0. Every deviation between the original v1.0 requirements baseline and the delivered system is recorded here with its rationale, so an examiner can trace requirements engineering decisions all the way to shipped code — not just read two documents that quietly disagree.</p>
+
+<h2>9.1 FR-05 — Payments: manual Mobile Money reconciliation, not gateway escrow</h2>
+<p>v1.0 specified in-app escrow via the MTN MoMo / AirtelTigo Money merchant APIs, with funds released to the farmer only on buyer delivery confirmation. Obtaining production merchant/PSP API access within a single-semester capstone timeline was not realistic, and doing so would have made FarmConnect itself a regulated payment intermediary under Bank of Ghana rules. The delivered design instead:</p>
+<ol>
+<li>Requires a farmer to link their Mobile Money network, phone number, and registered account name before publishing any listing.</li>
+<li>Shows those details to a buyer at checkout; the buyer pays directly via their own MoMo app/USSD, <em>outside</em> FarmConnect, then submits the transaction ID they received.</li>
+<li>Lets the farmer confirm or reject that transaction ID against their own Mobile Money SMS/history.</li>
+<li>Adds FR-14 (§3) as the dispute backstop for a buyer who insists they paid and a farmer who disputes it, arbitrated by an administrator.</li>
+</ol>
+<p>FarmConnect never touches, stores, or moves money at any point — it is a matching and reconciliation layer, which is both a safer regulatory posture and an honest reflection of what could be built and demonstrated in this project's timeframe.</p>
+
+<h2>9.2 FR-06 — Prices: a self-seeded simulated feed, not a GCX integration</h2>
+<p>No public, developer-accessible Ghana Commodity Exchange price API exists to integrate with at the time of writing. The delivered <code class="inline">PriceFeed</code> service instead seeds realistic per-crop prices on boot and nudges each by up to ±3% every 5 minutes, so the price dashboard, price-change indicators, and SMS <code class="inline">PRICE</code> command all behave exactly as a real feed would from the UI's point of view. The service is isolated behind one module boundary (§9.8/NFR-M1), so swapping in a real GCX (or any other) feed later is a contained change, not a rewrite.</p>
+
+<h2>9.3 FR-13 — Administration: a concrete design for an SRS sentence</h2>
+<p>v1.0 gave FR-08 (ratings), FR-10 (co-ops), and FR-13 (admin) one sentence of intent each, with no data model, workflow, or screen spec. Rather than leave them unspecified, the team designed and built a concrete admin portal (<code class="inline">/admin/users</code>, <code class="inline">/admin/listings</code>, <code class="inline">/admin/disputes</code>) gated by a real <code class="inline">ADMIN</code> role. There is deliberately no self-service admin signup — the public role-selection endpoint only ever issues <code class="inline">FARMER</code>/<code class="inline">BUYER</code>, and admin accounts are seeded out-of-band by whoever controls the deployment (a one-line CLI command against the production database), then log in through the exact same phone+OTP flow as everyone else. The <code class="inline">EXTENSION</code> (Agricultural Extension Officer) role named in v1.0's user classes exists as a reserved enum value in the data model but has no routes, guards, or screens — a deliberately deferred, not abandoned, requirement (see the Maintenance &amp; Future Evolution Plan).</p>
+
+<h2>9.4 FR-07 — Advisory chatbot: Google Gemini, not an unspecified/Claude-style provider</h2>
+<p>v1.0 left the AI provider unspecified beyond "AI-powered." The delivered system uses Google Gemini (<code class="inline">gemini-flash-latest</code>) specifically because it has a genuinely free developer-side tier with no credit card and no per-end-user account requirement — the right fit for a chatbot shared by many farmers/buyers, none of whom should need their own AI provider account. Weather context (OpenWeatherMap, Redis-cached) is folded into the system prompt when the caller's location is available; if the weather lookup or the Gemini call itself is unconfigured, the advisor either degrades gracefully (weather) or fails loudly with a clear error (no Gemini key) rather than fabricating a response.</p>
+
+<h2>9.5 FR-03 — Search: text/filter search shipped; voice input did not</h2>
+<p>v1.0 mentioned voice-input search as a stretch capability. Text search, category/crop filters, price-range filters, and geo-radius filtering are all implemented; voice input was descoped for time and is listed as a future enhancement in the Maintenance &amp; Future Evolution Plan.</p>
+
+<h2>9.6 FR-08 / FR-10 — Ratings and co-ops: the concrete workflow rules</h2>
+<p>Ratings: a rating can only be left on an order once it reaches <code class="inline">delivered</code>, one rating per (order, rater); each new rating recomputes the rated user's trust score and rating count in the same database transaction as the insert, so the two figures can never drift apart. Co-ops: a farmer belongs to at most one co-op at a time; a listing can optionally be attributed to the farmer's co-op instead of inventing a separate bulk-order/negotiation subsystem the SRS never specified; leaving a co-op promotes the earliest-joined remaining member to leader, or dissolves the co-op if the leader was the sole member.</p>
+
+<h2>9.7 Platform &amp; interface deviations</h2>
+<p>The frontend is a plain React web PWA rather than a native/React Native build (§7), and real-time updates use REST polling rather than WebSockets (§5.4) — both are load-bearing simplifications, not cosmetic ones, and both are revisited as future work in the Maintenance &amp; Future Evolution Plan. The admin portal is English-only by deliberate exception to FR-12: it is an internal staff tool, not part of the farmer/buyer-facing product the bilingual requirement targets.</p>
+
+<h2>9.8 Requirements not fully verified at capstone scale</h2>
+<p>NFR-P2 (10,000 concurrent users) and NFR-R1/R2 (99.5% uptime SLA, daily backups) describe production-operations targets that this capstone submission has not load-tested or operated long enough to demonstrate empirically. The architecture does not preclude meeting them (stateless API instances behind a load balancer, a managed Postgres with point-in-time recovery), but that verification is explicitly out of scope for a single-semester deliverable and is called out here rather than silently claimed. See the Testing Report and the Maintenance &amp; Future Evolution Plan for what was actually measured and what is recommended before any real pilot.</p>
+</section>
+
+<!-- ============ 10. APPENDICES ============ -->
+<section class="section" id="s10">
+<div class="runhead">FarmConnect Ghana · SRS</div>
+<h1>10. Appendices</h1>
+
+<h2>Appendix A — AI Prompts Used in SRS Drafting</h2>
+<p>In accordance with course AI-disclosure requirements, the following prompts (submitted via Claude, claude.ai) were used by George Boadu Junior to assist in drafting the v1.0 SRS, which the team then reviewed and finalised, and which this v2.0 revision reconciles against the delivered system:</p>
+<ol>
+<li>“Act as a senior software engineer. Write a full Software Requirements Specification (SRS) for a mobile-first web app called FarmConnect Ghana that connects smallholder Ghanaian farmers directly to buyers. Include: Introduction, Scope, Definitions, Functional Requirements (with FR IDs), Non-Functional Requirements, and Constraints. Use IEEE 830 format.”</li>
+<li>“Update the SRS to include Ghana-specific context: mobile money payment integration (MTN MoMo, AirtelTigo), SMS fallback for feature phones, Twi language support, and Ghana Commodity Exchange (GCX) price feed integration.”</li>
+<li>“Expand the Non-Functional Requirements section. Add measurable targets for Performance (response time, concurrent users), Security (encryption, authentication), and Reliability (uptime SLA, offline support).”</li>
+</ol>
+
+<h2>Appendix B — Prototype Design Prompts</h2>
+<p>The following prompts were submitted via Figma Make to produce the early UX/flow/copy prototype referenced during design (screen names, i18n keys, and the colour palette were carried forward from it into the real implementation; it was not pixel-matched):</p>
+<ol>
+<li>“Create a mobile app UI for FarmConnect Ghana — a farmer-to-buyer agricultural marketplace. Style: clean, modern, green colour palette. Screens needed: Onboarding/Login, Farmer Dashboard, Create Listing, Buyer Marketplace, AI Advisory Chatbot. Target users: Ghanaian smallholder farmers with low-end Android phones.”</li>
+<li>“Redesign the Farmer Dashboard screen. Add: a personalised greeting at the top, a 3-stat summary row (Active Listings, Pending Orders, Earnings), produce listing cards with status badges (Active / Pending / Sold), and a bottom navigation bar with icons for Home, Listings, Orders, Prices, and Profile.”</li>
+<li>“Create the Buyer Marketplace screen. Include: a search bar with voice input icon, horizontal filter chip row (All / Grains / Vegetables / Fruits), and listing cards showing: crop emoji, crop name, farmer name and region, quantity, price per kg, distance, and a verified farmer badge. Ensure large tap targets throughout.”</li>
+<li>“Update all screens to support Twi (Akan) as an alternative language. Add a language toggle button top-right. Increase minimum button height to 48dp. Add high-contrast mode. Ensure all interactive elements have accessible labels.”</li>
+</ol>
+
+<h2>Appendix C — Group "Angry Nerds"</h2>
+<p>Full roster and per-member contributions are recorded in "Group Information" at the front of this document. This individual submission package was assembled and authored by George Boadu Junior; each other group member submits the same core deliverables individually, annotated with their own contribution and understanding of the system as required by the CSCD602 Individual Submission Requirement.</p>
+<p><small>University of Ghana, Department of Computer Science — Advanced Software Engineering (CSCD602), Capstone Project.</small></p>
+</section>
+
+</body>
+</html>

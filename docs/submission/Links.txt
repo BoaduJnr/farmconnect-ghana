@@ -1,0 +1,30 @@
+FarmConnect Ghana — Links.txt
+CSCD602: Advanced Software Engineering — Capstone Project Coursework
+================================================================
+
+Group Number/Name: Angry Nerds  [Group Number as assigned on SAKAI/by the instructor — fill in if one was issued]
+Project Title: FarmConnect Ghana
+
+Live Application: [ FILL IN — e.g. https://farmconnect-ghana.vercel.app — see Deployment_Guide.pdf ]
+Admin URL: [ FILL IN — <Live Application URL>/admin/users ]
+Source Code Repository: [ FILL IN — e.g. https://github.com/BoaduJnr/farmconnect-ghana ]
+
+Test User:
+  Username: [ any Ghanaian-format phone number, e.g. 024xxxxxxx — authentication is phone + one-time SMS
+              code, there is no fixed password. Register it live on first use, or provide one you have
+              already registered here. ]
+  Password: N/A — a one-time code is sent by SMS to the number above at login time (or, if SMS is not
+            configured on the deployment, the code appears in the Render service log instead).
+
+Administrator:
+  Username: [ FILL IN — the phone number seeded as admin; see Deployment_Guide.pdf Step 8:
+              npx tsx apps/api/prisma/seed.ts --phone <number> --name "<name>" ]
+  Password: N/A — same phone + one-time SMS code login as above.
+
+Notes for the examiner:
+- IMPORTANT: this project uses passwordless phone+OTP authentication throughout — there is no
+  static password for any account, by design (see SRS.pdf and User_Manual.pdf). This is why the
+  "Password" fields above are marked N/A rather than left blank by omission.
+- Full step-by-step deployment instructions: Deployment_Guide.pdf
+- Full test evidence (69 automated tests + 11 manual smoke tests, all passing): Testing_Report.pdf
+- Full usage instructions for every role: User_Manual.pdf

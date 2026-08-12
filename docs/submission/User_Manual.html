@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FarmConnect Ghana — User Manual</title>
+<link rel="stylesheet" href="assets/report.css">
+<style>
+.step { display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
+.step .n { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: #1B7A3D; color: #fff; font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: center; }
+.step .t { padding-top: 1px; }
+.sms-cmd { background: #14532d; color: #eaf6ec; font-family: 'Cascadia Code', Consolas, monospace; padding: 2px 8px; border-radius: 4px; font-size: 9.5pt; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div>
+    <div class="brandmark"><span class="dot">FC</span><span class="name">FarmConnect Ghana</span></div>
+    <div class="kicker">User Manual</div>
+    <h1 class="doctitle">User<br>Manual</h1>
+    <div class="docsubtitle">A Complete Guide for Farmers, Buyers, and Administrators</div>
+    <p class="lede">Covers both access channels — the installable app (smartphone) and the SMS command channel (any phone, no data required) — and every role: Farmer, Buyer, and Administrator.</p>
+  </div>
+  <table class="meta-table">
+    <tr><td class="k">Course</td><td class="v">CSCD602 — Advanced Software Engineering, Capstone Project</td></tr>
+    <tr><td class="k">Group</td><td class="v">Angry Nerds</td></tr>
+    <tr><td class="k">Project title</td><td class="v">FarmConnect Ghana</td></tr>
+    <tr><td class="k">Document version</td><td class="v">1.0</td></tr>
+    <tr><td class="k">Date</td><td class="v">12 August 2026</td></tr>
+    <tr><td class="k">Individual submission by</td><td class="v">George Boadu Junior — 22427354</td></tr>
+  </table>
+  <div class="footer-block">Companion document to the SRS, Design Documentation, and Testing Report.</div>
+</section>
+
+<section class="section">
+<h1>Table of Contents</h1>
+<ul class="toc">
+<li><span class="num">1</span><a href="#u1">Getting Started</a></li>
+<li><span class="num">2</span><a href="#u2">Farmer Guide</a></li>
+<li><span class="num">3</span><a href="#u3">Buyer Guide</a></li>
+<li><span class="num">4</span><a href="#u4">Administrator Guide</a></li>
+<li><span class="num">5</span><a href="#u5">SMS Command Reference (Feature Phones)</a></li>
+<li><span class="num">6</span><a href="#u6">Notifications</a></li>
+<li><span class="num">7</span><a href="#u7">Language &amp; Accessibility</a></li>
+<li><span class="num">8</span><a href="#u8">Troubleshooting &amp; FAQ</a></li>
+</ul>
+</section>
+
+<section class="section" id="u1">
+<div class="runhead">FarmConnect Ghana · User Manual</div>
+<h1>1. Getting Started</h1>
+
+<h2>1.1 What you need</h2>
+<ul>
+<li>Any smartphone with a modern browser (Chrome, Safari, Edge) — <strong>no app-store download needed</strong>; <em>or</em> any basic phone that can send/receive SMS.</li>
+<li>A phone number that can receive SMS (used for OTP login and, for farmers, for order alerts).</li>
+<li>Farmers additionally need a registered Mobile Money account (MTN MoMo, Telecel Cash, or AirtelTigo Money).</li>
+</ul>
+
+<h2>1.2 Opening the app</h2>
+<div class="step"><div class="n">1</div><div class="t">Open the live application URL in your phone's browser (see the README/Links.txt for the exact address).</div></div>
+<div class="step"><div class="n">2</div><div class="t">Optional but recommended: your browser will offer <strong>"Add to Home Screen" / "Install app"</strong> — accept it. FarmConnect then opens like any other app icon and keeps working (for previously-seen data) even with a weak connection.</div></div>
+<div class="step"><div class="n">3</div><div class="t">Choose English or Twi from the language toggle at any time — it applies immediately, no restart.</div></div>
+
+<h2>1.3 Creating an account</h2>
+<div class="step"><div class="n">1</div><div class="t">Enter your phone number.</div></div>
+<div class="step"><div class="n">2</div><div class="t">You'll receive a 6-digit code by SMS — enter it within 5 minutes.</div></div>
+<div class="step"><div class="n">3</div><div class="t">First time only: choose <strong>Farmer</strong> or <strong>Buyer</strong>. This cannot be changed later from inside the app — contact an administrator if you picked the wrong one.</div></div>
+<div class="step"><div class="n">4</div><div class="t">You're in. Returning users just repeat steps 1–2 — the app remembers your role.</div></div>
+<div class="callout note"><span class="label">No password, ever</span>FarmConnect never asks for a password — only your phone number and the one-time code sent to it. If anything on-screen asks you for a password, it is not part of FarmConnect.</div>
+</section>
+
+<section class="section" id="u2">
+<div class="runhead">FarmConnect Ghana · User Manual</div>
+<h1>2. Farmer Guide</h1>
+
+<h2>2.1 Link your Mobile Money details (required first step)</h2>
+<p>Immediately after choosing "Farmer," you'll be asked to link Mobile Money — this cannot be skipped, because buyers need it to pay you directly.</p>
+<div class="step"><div class="n">1</div><div class="t">Choose your network: MTN, Telecel, or AirtelTigo.</div></div>
+<div class="step"><div class="n">2</div><div class="t">Enter the phone number registered to that Mobile Money account.</div></div>
+<div class="step"><div class="n">3</div><div class="t">Enter the account name exactly as it shows on your Mobile Money — buyers will double-check this before paying.</div></div>
+<div class="step"><div class="n">4</div><div class="t">Save. You can update these details any time from <strong>Profile → Mobile Money</strong>.</div></div>
+
+<h2>2.2 Your Home screen</h2>
+<p>Shows a personalised greeting, a 3-stat summary (active listings, pending orders, total earned), your recent listings with status badges, and a big <strong>"+ New listing"</strong> button. A quick-action card also opens the <strong>Advisor</strong> chat directly from Home (farmers don't have a separate Advisor tab — see §2.7).</p>
+
+<h2>2.3 Creating a listing</h2>
+<div class="step"><div class="n">1</div><div class="t">Tap <strong>+ New listing</strong>.</div></div>
+<div class="step"><div class="n">2</div><div class="t">Add one or more photos of your produce (tap to use your camera or photo library).</div></div>
+<div class="step"><div class="n">3</div><div class="t">Choose the crop type, then enter quantity (kg) and price per kg.</div></div>
+<div class="step"><div class="n">4</div><div class="t">Set the harvest/availability date.</div></div>
+<div class="step"><div class="n">5</div><div class="t">Tap <strong>"Use current location"</strong> to set your farm's location (buyers filter/sort by distance) — or type your region.</div></div>
+<div class="step"><div class="n">6</div><div class="t">If you belong to a co-op and want this listing to show under the co-op's name instead of just yours, check <strong>"Sell as my co-op."</strong></div></div>
+<div class="step"><div class="n">7</div><div class="t">Tap <strong>Publish listing</strong>. It appears in the buyer marketplace immediately, status <em>Active</em>.</div></div>
+<p>From <strong>Listings</strong>, you can edit any of your own listings' details, or remove one (it moves to <em>Removed</em> — no data is deleted).</p>
+
+<h2>2.4 Handling an order &amp; getting paid</h2>
+<p>This is the most important flow to get right — read it carefully.</p>
+<div class="step"><div class="n">1</div><div class="t">A buyer places an order on your listing — you get an in-app and SMS notification. The listing is now <em>Pending</em> (other buyers can't order it while a deal is in progress).</div></div>
+<div class="step"><div class="n">2</div><div class="t">The buyer sends the money directly to your Mobile Money number using their own phone (their MoMo app or USSD code) — this happens completely outside FarmConnect; you will see a normal Mobile Money SMS from your network exactly as usual.</div></div>
+<div class="step"><div class="n">3</div><div class="t">The buyer then submits a transaction ID inside the app. You get a notification: <em>"Verify this transaction ID."</em></div></div>
+<div class="step"><div class="n">4</div><div class="t">Open the order and <strong>check that transaction ID against your own Mobile Money SMS/history.</strong> This is the one manual check that keeps FarmConnect free and safe — nobody else does it for you.</div></div>
+<div class="step"><div class="n">5</div><div class="t">If it matches: tap <strong>Confirm payment</strong>. If it doesn't match anything in your history: tap <strong>Reject payment</strong> and add a short note — the buyer can then correct and resubmit, or raise a dispute.</div></div>
+<div class="step"><div class="n">6</div><div class="t">Once the buyer collects/receives the produce and confirms delivery in the app, the order is complete and the listing is marked <em>Sold</em>.</div></div>
+<div class="callout deviation"><span class="label">Why this step exists</span>FarmConnect does not run a payment gateway and never touches your money — see the SRS §9.1 for why. This means the money reaches your Mobile Money account exactly as if a friend sent it to you directly, with no delay and no platform fee taken out — but it also means you are the one person who can see your own Mobile Money history, so only you can confirm a payment really happened.</div>
+
+<h2>2.5 Disputes</h2>
+<p>If a buyer believes they paid but you rejected the payment, they can raise a dispute. An administrator will review it and decide — you'll be notified either way, and the outcome (order proceeds, or is cancelled and your listing reopens) is final.</p>
+
+<h2>2.6 Co-ops</h2>
+<div class="step"><div class="n">1</div><div class="t">From <strong>Profile → My Co-op</strong>, either <strong>create</strong> a co-op (you become its leader and get a short join code to share) or <strong>join</strong> one using a code a leader shared with you.</div></div>
+<div class="step"><div class="n">2</div><div class="t">You can belong to only one co-op at a time.</div></div>
+<div class="step"><div class="n">3</div><div class="t">Leaving: if you're a regular member, you simply leave. If you're the leader, leadership automatically passes to whoever joined earliest among the remaining members; if you were the only member, the co-op is dissolved.</div></div>
+
+<h2>2.7 Ratings, Prices &amp; the Advisor</h2>
+<ul>
+<li><strong>Ratings</strong> — once an order is delivered, both you and the buyer can rate each other 1–5 stars. Your trust score and rating count update immediately and show on your listings.</li>
+<li><strong>Prices tab</strong> — live per-crop prices with a % change indicator, refreshed every few minutes.</li>
+<li><strong>Advisor</strong> — reached via the quick-action card on Home: ask about pests, weather, or best practice in plain English or Twi; attach a photo of a sick-looking crop for a photo-based diagnosis. If your location is on, the advice accounts for the current weather near you.</li>
+</ul>
+</section>
+
+<section class="section" id="u3">
+<div class="runhead">FarmConnect Ghana · User Manual</div>
+<h1>3. Buyer Guide</h1>
+
+<h2>3.1 The Marketplace</h2>
+<p>Your home tab. Search by crop name, filter by category (Grains/Vegetables/Fruits/Tubers), and each card shows the crop, farmer's name and region, quantity, price per kg, distance from you, and the farmer's trust score/verified badge.</p>
+
+<h2>3.2 Placing an order</h2>
+<div class="step"><div class="n">1</div><div class="t">Tap a listing to see full details — more photos, harvest date, exact quantity available, and the farmer's rating history.</div></div>
+<div class="step"><div class="n">2</div><div class="t">Choose how much you want (up to what's available) and tap <strong>Order</strong>.</div></div>
+<div class="step"><div class="n">3</div><div class="t">You'll see a total that includes a flat delivery fee, and — critically — the <strong>farmer's Mobile Money details</strong> (network, number, account name) to pay to.</div></div>
+
+<h2>3.3 Paying &amp; confirming</h2>
+<div class="step"><div class="n">1</div><div class="t">Open your own Mobile Money app or dial the USSD code for your network, and send the exact total shown to the number FarmConnect displayed. <strong>Double-check the account name matches</strong> before sending.</div></div>
+<div class="step"><div class="n">2</div><div class="t">Your network will text you a transaction ID/reference for the transfer, as it always does.</div></div>
+<div class="step"><div class="n">3</div><div class="t">Back in FarmConnect, tap <strong>"I've paid — submit"</strong> and enter the phone number you paid from and the transaction ID. The order status becomes <em>Payment submitted</em>.</div></div>
+<div class="step"><div class="n">4</div><div class="t">Wait for the farmer to confirm (usually quick — it's their money arriving). If they reject it (wrong ID, or they genuinely haven't received it yet), you can correct and resubmit, or if you're sure you paid correctly, raise a dispute for an administrator to review.</div></div>
+<div class="step"><div class="n">5</div><div class="t">Once you actually receive the produce, open the order and tap <strong>Confirm delivery</strong>. This closes the order and lets both of you rate each other.</div></div>
+<div class="callout risk"><span class="label">Only pay after you see the farmer's real Mobile Money details on the order screen</span>FarmConnect will never ask you to pay into any account other than the one shown on your specific order. Never send money based on a phone number given to you outside the app.</div>
+
+<h2>3.4 Orders, Prices &amp; the Advisor</h2>
+<ul>
+<li><strong>Orders tab</strong> — every order you've placed, with its current status, from <em>Pending</em> through to <em>Delivered</em> (or <em>Cancelled</em>).</li>
+<li><strong>Prices tab</strong> — the same live price feed farmers see, useful for knowing whether an asking price is fair.</li>
+<li><strong>Advisor tab</strong> — the same AI advisory chat available to farmers (buyers can ask about produce quality, storage, seasonality, etc.).</li>
+</ul>
+</section>
+
+<section class="section" id="u4">
+<div class="runhead">FarmConnect Ghana · User Manual</div>
+<h1>4. Administrator Guide</h1>
+<p>The Admin Portal is a separate, desktop-friendly layout at <code class="inline">/admin/users</code>, <code class="inline">/admin/listings</code>, <code class="inline">/admin/disputes</code> — it has no bottom navigation and is English-only (it's an internal tool, not the farmer/buyer product). There is no public admin sign-up; an administrator account is created directly against the database by whoever runs the deployment (see the Maintenance &amp; System Administration section of the Project Documentation), then logs in through the same phone+OTP screen as everyone else.</p>
+
+<h2>4.1 Users</h2>
+<p>List every farmer/buyer, optionally filtered by role. For any user: <strong>Verify</strong> (adds a trust badge visible to other users) or <strong>Suspend</strong> (blocks their next login/refresh — already-open sessions expire naturally rather than being force-killed).</p>
+
+<h2>4.2 Listings</h2>
+<p>See every listing regardless of status (the public marketplace only shows <em>Active</em> ones). Force a listing's status — most commonly, set a fraudulent or inappropriate listing to <em>Removed</em>; the farmer is notified.</p>
+
+<h2>4.3 Disputes</h2>
+<p>Shows every order currently <em>Disputed</em>, oldest first. Open one to see the full history — the amount, the farmer's Mobile Money details on file, the buyer's submitted transaction ID, and the farmer's rejection note. Resolve it one of two ways:</p>
+<ul>
+<li><strong>Uphold the payment</strong> — you believe the buyer really did pay; the order becomes <em>Paid</em> and proceeds normally.</li>
+<li><strong>Uphold the rejection</strong> — you believe the farmer is right; the order is <em>Cancelled</em> and the listing reopens for other buyers.</li>
+</ul>
+<p>Both parties are notified of your decision either way — there is no third outcome and no way to reopen a resolved dispute from the UI (this is by design, to keep the audit trail clean).</p>
+</section>
+
+<section class="section" id="u5">
+<div class="runhead">FarmConnect Ghana · User Manual</div>
+<h1>5. SMS Command Reference (Feature Phones)</h1>
+<p>Text these commands to the FarmConnect SMS number — no smartphone, no app, no data plan required. Every command works whether or not you're already registered (except where noted).</p>
+<table>
+<thead><tr><th style="width:22%">Command</th><th>What it does</th></tr></thead>
+<tbody>
+<tr><td><span class="sms-cmd">HELP</span></td><td>Replies with the full list of commands.</td></tr>
+<tr><td><span class="sms-cmd">REG your name</span></td><td>Registers you as a Farmer using your phone number as your identity — no OTP needed over SMS.</td></tr>
+<tr><td><span class="sms-cmd">MOMO mtn 024xxxxxxx</span></td><td>Links your Mobile Money network + number (required before <span class="sms-cmd">LIST</span> works). Networks: <code class="inline">mtn</code>, <code class="inline">telecel</code>, <code class="inline">airteltigo</code>.</td></tr>
+<tr><td><span class="sms-cmd">LIST maize 200 3.50 Ashanti</span></td><td>Publishes a listing: crop, quantity (kg), price per kg, region.</td></tr>
+<tr><td><span class="sms-cmd">PRICE maize</span></td><td>Replies with the current price for that crop.</td></tr>
+<tr><td><span class="sms-cmd">ORDERS</span></td><td>Lists your open orders needing action.</td></tr>
+<tr><td><span class="sms-cmd">CONFIRM 4f2a</span></td><td>Confirms a payment for the order whose ID ends in that code (shown in the <span class="sms-cmd">ORDERS</span> reply).</td></tr>
+</tbody>
+</table>
+<div class="callout note"><span class="label">Trust model, stated plainly</span>The SMS channel treats possession of the phone number as proof of identity, with no OTP round-trip — the same trust boundary Mobile Money itself already relies on for its own USSD menus. Every inbound message is logged for audit regardless of outcome.</div>
+</section>
+
+<section class="section" id="u6">
+<div class="runhead">FarmConnect Ghana · User Manual</div>
+<h1>6. Notifications</h1>
+<p>The bell icon on every main screen shows an unread-count badge. Tap it to see every order, admin, and co-op event — each also arrives as an SMS if it's time-sensitive (order placed, payment submitted/confirmed/rejected, delivery confirmed, dispute resolved, account verified/suspended). A failed SMS never blocks the underlying action — you'll still see it in-app either way.</p>
+</section>
+
+<section class="section" id="u7">
+<div class="runhead">FarmConnect Ghana · User Manual</div>
+<h1>7. Language &amp; Accessibility</h1>
+<ul>
+<li>Switch between English and Twi (Akan) from the language toggle at any time — every farmer/buyer screen updates immediately.</li>
+<li>All buttons meet a minimum touch-target size for easy tapping on any screen size.</li>
+<li>Every icon-only button (back, attach photo, send, notification bell) has a screen-reader label; content photos have descriptive alt text.</li>
+<li>Keyboard users get a clearly visible focus outline on every field.</li>
+</ul>
+</section>
+
+<section class="section" id="u8">
+<div class="runhead">FarmConnect Ghana · User Manual</div>
+<h1>8. Troubleshooting &amp; FAQ</h1>
+<table class="plain">
+<tbody>
+<tr><td style="width:280px"><strong>I didn't get my OTP code</strong></td><td>Wait a minute (SMS delivery can lag), then use "Resend code." Codes expire after 5 minutes. If it still doesn't arrive, your number may have hit the hourly request limit (protects against SMS abuse) — try again after an hour.</td></tr>
+<tr><td><strong>I can't publish a listing</strong></td><td>You must link Mobile Money first (Profile → Mobile Money) — this is enforced by the app, not optional.</td></tr>
+<tr><td><strong>I paid but the farmer rejected it</strong></td><td>Double-check the transaction ID and the number you paid from match exactly what you submitted. If you're sure it's correct, raise a dispute — an administrator will review your evidence.</td></tr>
+<tr><td><strong>The app looks stale / out of date</strong></td><td>You may be offline — check for the offline banner at the top. Data shown while offline is the last version you saw online, not necessarily current.</td></tr>
+<tr><td><strong>The advisor says it's "not configured"</strong></td><td>This means the deployment's AI provider key isn't set up yet — contact the administrator/deployer, not a bug in your account.</td></tr>
+<tr><td><strong>I want to become an Administrator</strong></td><td>There's no self-service sign-up for this role — it's provisioned directly by whoever manages the deployment.</td></tr>
+</tbody>
+</table>
+</section>
+
+</body>
+</html>

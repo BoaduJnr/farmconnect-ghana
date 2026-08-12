@@ -1,0 +1,762 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FarmConnect Ghana — Design Documentation</title>
+<link rel="stylesheet" href="assets/report.css">
+<style>
+  .lifeline { stroke: #94a3b8; stroke-width: 1.2; stroke-dasharray: 3 3; }
+  .msg { stroke: #14532d; stroke-width: 1.4; fill: none; }
+  .msg.ext { stroke: #b45309; stroke-dasharray: 5 3; }
+  .msg.ret { stroke: #64748a; stroke-dasharray: 2 3; }
+  .actorbox { fill: #eef6ee; stroke: #1B7A3D; stroke-width: 1.3; }
+  .sysbox { fill: #f1f5f4; stroke: #334155; stroke-width: 1.3; }
+  .extbox { fill: #fef3e2; stroke: #b45309; stroke-width: 1.3; }
+  .databox { fill: #eaf2ff; stroke: #1d4e89; stroke-width: 1.3; }
+  .lbl { font-size: 10.4px; fill: #1f2a24; }
+  .lbl.sm { font-size: 9px; fill: #4b5a52; }
+  .lbl.wt { font-size: 10.4px; fill: #fff; font-weight:600; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<section class="cover">
+  <div>
+    <div class="brandmark"><span class="dot">FC</span><span class="name">FarmConnect Ghana</span></div>
+    <div class="kicker">System Analysis &amp; Design Documentation</div>
+    <h1 class="doctitle">Design<br>Documentation</h1>
+    <div class="docsubtitle">Architecture, UML Diagrams, Database Design &amp; UI Wireframes for the Delivered System</div>
+    <p class="lede">Every diagram in this document depicts the system as it was actually built and deployed — module names, routes, and data-model fields are traced directly from source (Prisma schema, Express routers, React routes), not redrawn from the original proposal. Where a diagram differs from what the SRS v1.0 originally imagined, the difference is explained inline.</p>
+  </div>
+  <table class="meta-table">
+    <tr><td class="k">Course</td><td class="v">CSCD602 — Advanced Software Engineering, Capstone Project</td></tr>
+    <tr><td class="k">Group</td><td class="v">Angry Nerds</td></tr>
+    <tr><td class="k">Project title</td><td class="v">FarmConnect Ghana</td></tr>
+    <tr><td class="k">Document version</td><td class="v">1.0</td></tr>
+    <tr><td class="k">Date</td><td class="v">12 August 2026</td></tr>
+    <tr><td class="k">Individual submission by</td><td class="v">George Boadu Junior — 22427354</td></tr>
+  </table>
+  <div class="footer-block">Companion document to the Software Requirements Specification. See the SRS "Group Information" section for the full roster.</div>
+</section>
+
+<!-- ============ TOC ============ -->
+<section class="section">
+<h1>Table of Contents</h1>
+<ul class="toc">
+<li><span class="num">1</span><a href="#d1">Design Approach &amp; Notation</a></li>
+<li><span class="num">2</span><a href="#d2">System &amp; Deployment Architecture</a></li>
+<li><span class="num">3</span><a href="#d3">Component View</a></li>
+<li><span class="num">4</span><a href="#d4">Use-Case Diagram &amp; Descriptions</a></li>
+<li><span class="num">5</span><a href="#d5">Class Diagram</a></li>
+<li><span class="num">6</span><a href="#d6">Entity-Relationship Diagram &amp; Database Design</a></li>
+<li><span class="num">7</span><a href="#d7">Sequence Diagrams</a></li>
+<li><span class="num">8</span><a href="#d8">Order Lifecycle — State Diagram</a></li>
+<li><span class="num">9</span><a href="#d9">User Interface Wireframes</a></li>
+<li><span class="num">10</span><a href="#d10">Technology Architecture</a></li>
+<li><span class="num">11</span><a href="#d11">Design Decisions Where the SRS Was Silent</a></li>
+</ul>
+</section>
+
+<!-- ============ 1. NOTATION ============ -->
+<section class="section" id="d1">
+<div class="runhead">FarmConnect Ghana · Design Documentation</div>
+<h1>1. Design Approach &amp; Notation</h1>
+<p>Diagrams below use standard UML notation (use-case, class, sequence, state) plus one informal deployment/architecture diagram and a set of low-fidelity UI wireframes. Every diagram was produced <em>from</em> the delivered source tree — routes, models, and status enums are copied verbatim from <code class="inline">apps/api/prisma/schema.prisma</code>, <code class="inline">packages/shared/src</code>, and the Express routers — rather than being an idealised plan drawn before implementation. Colour coding used consistently across diagrams:</p>
+<table class="plain">
+<tbody>
+<tr><td style="width:26px"><svg width="20" height="14"><rect width="20" height="14" rx="2" fill="#eef6ee" stroke="#1B7A3D"/></svg></td><td>FarmConnect-owned component (frontend, backend module, actor role)</td></tr>
+<tr><td><svg width="20" height="14"><rect width="20" height="14" rx="2" fill="#eaf2ff" stroke="#1d4e89"/></svg></td><td>Persistent data store (PostgreSQL, Redis)</td></tr>
+<tr><td><svg width="20" height="14"><rect width="20" height="14" rx="2" fill="#fef3e2" stroke="#b45309"/></svg></td><td>External third-party service (Gemini, OpenWeatherMap, SMS gateways)</td></tr>
+<tr><td><svg width="20" height="14"><rect width="20" height="14" rx="2" fill="#fdf1f0" stroke="#b42318"/></svg></td><td>Terminal/negative state or blocked path (cancelled, rejected, suspended)</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ============ 2. ARCHITECTURE ============ -->
+<section class="section" id="d2">
+<div class="runhead">FarmConnect Ghana · Design Documentation</div>
+<h1>2. System &amp; Deployment Architecture</h1>
+<p>Three tiers — client, API, data/external — matching SRS §7, shown here with the actual protocols and providers used at runtime.</p>
+
+<figure class="no-break">
+<svg viewBox="0 0 900 500" role="img" aria-label="Deployment architecture: smartphone and feature-phone clients reach an API server backed by Postgres and Redis, which in turn calls Gemini, OpenWeatherMap, and two SMS gateway providers.">
+<defs>
+<marker id="ar1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#1B7A3D"/></marker>
+</defs>
+<!-- clients -->
+<rect x="30" y="20" width="230" height="56" rx="8" class="actorbox"/>
+<text x="145" y="44" text-anchor="middle" class="lbl" font-weight="700">Smartphone browser</text>
+<text x="145" y="60" text-anchor="middle" class="lbl sm">Installed PWA (Farmer / Buyer / Admin UI)</text>
+
+<rect x="330" y="20" width="220" height="56" rx="8" class="actorbox"/>
+<text x="440" y="44" text-anchor="middle" class="lbl" font-weight="700">Feature phone</text>
+<text x="440" y="60" text-anchor="middle" class="lbl sm">SMS only — no app, no data plan</text>
+
+<!-- hosting -->
+<rect x="30" y="150" width="230" height="54" rx="8" class="sysbox"/>
+<text x="145" y="172" text-anchor="middle" class="lbl" font-weight="700">Static PWA hosting</text>
+<text x="145" y="188" text-anchor="middle" class="lbl sm">Vercel/Netlify — HTML/JS/CSS + service worker</text>
+
+<rect x="300" y="150" width="250" height="54" rx="8" class="extbox"/>
+<text x="425" y="172" text-anchor="middle" class="lbl" font-weight="700">SMS Gateways</text>
+<text x="425" y="188" text-anchor="middle" class="lbl sm">GiantSMS (outbound) · Africa's Talking (inbound)</text>
+
+<!-- API -->
+<rect x="30" y="260" width="520" height="66" rx="8" class="sysbox"/>
+<text x="290" y="286" text-anchor="middle" class="lbl" font-weight="700">API server — Node.js / Express (TypeScript)</text>
+<text x="290" y="303" text-anchor="middle" class="lbl sm">Auth · Listings · Orders · Prices · Advisory · Notifications · Co-ops · Admin · SMS-Gateway · Uploads</text>
+
+<!-- data -->
+<rect x="30" y="400" width="200" height="56" rx="8" class="databox"/>
+<text x="130" y="424" text-anchor="middle" class="lbl" font-weight="700">PostgreSQL 16</text>
+<text x="130" y="440" text-anchor="middle" class="lbl sm">via Prisma ORM — primary store</text>
+
+<rect x="260" y="400" width="200" height="56" rx="8" class="databox"/>
+<text x="360" y="424" text-anchor="middle" class="lbl" font-weight="700">Redis 7</text>
+<text x="360" y="440" text-anchor="middle" class="lbl sm">OTP · rate-limit · refresh allowlist · weather cache</text>
+
+<!-- external AI/weather -->
+<rect x="620" y="260" width="240" height="54" rx="8" class="extbox"/>
+<text x="740" y="282" text-anchor="middle" class="lbl" font-weight="700">Google Gemini</text>
+<text x="740" y="298" text-anchor="middle" class="lbl sm">gemini-flash-latest — text + vision</text>
+
+<rect x="620" y="330" width="240" height="54" rx="8" class="extbox"/>
+<text x="740" y="352" text-anchor="middle" class="lbl" font-weight="700">OpenWeatherMap</text>
+<text x="740" y="368" text-anchor="middle" class="lbl sm">current weather, by lat/lng</text>
+
+<!-- arrows -->
+<line x1="120" y1="76" x2="120" y2="150" class="msg" marker-end="url(#ar1)"/>
+<text x="128" y="115" class="lbl sm">loads app shell</text>
+
+<line x1="230" y1="76" x2="290" y2="260" class="msg" marker-end="url(#ar1)"/>
+<text x="238" y="115" class="lbl sm">REST /api/* + JWT (HTTPS)</text>
+
+<line x1="420" y1="76" x2="400" y2="150" class="msg" marker-end="url(#ar1)"/>
+<text x="345" y="118" class="lbl sm">SMS command / delivery</text>
+
+<line x1="415" y1="204" x2="330" y2="260" class="msg" marker-end="url(#ar1)"/>
+<text x="330" y="235" class="lbl sm">webhook + outbound send</text>
+
+<line x1="130" y1="326" x2="130" y2="400" class="msg" marker-end="url(#ar1)"/>
+<line x1="360" y1="326" x2="360" y2="400" class="msg" marker-end="url(#ar1)"/>
+
+<line x1="550" y1="283" x2="620" y2="283" class="msg" marker-end="url(#ar1)"/>
+<text x="558" y="277" class="lbl sm">advisory calls</text>
+<line x1="550" y1="300" x2="620" y2="352" class="msg" marker-end="url(#ar1)"/>
+<text x="558" y="322" class="lbl sm">weather lookup</text>
+</svg>
+<figcaption>Figure 2.1 — Deployment/architecture view. Clients never talk to Postgres/Redis/Gemini/OpenWeatherMap directly; every external and data call is mediated by the single Express API, which is the only component holding credentials for any downstream service.</figcaption>
+</figure>
+
+<div class="callout note"><span class="label">Why one API, not micro-services</span>NFR-M1 asks for modules "organised to simplify... future extraction into independent services" — not that they <em>be</em> separate services today. A single deployable API with clean module boundaries (see §3) gets the maintainability benefit without the operational cost of running/monitoring nine separate services for a capstone-scale user base.</div>
+</section>
+
+<!-- ============ 3. COMPONENT VIEW ============ -->
+<section class="section" id="d3">
+<div class="runhead">FarmConnect Ghana · Design Documentation</div>
+<h1>3. Component View</h1>
+<p>A logical (code-module) view, distinct from the physical deployment view above: what depends on what at the package/module level.</p>
+
+<figure class="no-break">
+<svg viewBox="0 0 900 480" role="img" aria-label="Component diagram: apps/web depends on packages/shared and calls apps/api over HTTPS; apps/api depends on packages/shared and calls Prisma/Postgres, Redis, and external providers.">
+<defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#334155"/></marker></defs>
+
+<rect x="30" y="20" width="380" height="190" rx="8" fill="#f7fbf8" stroke="#1B7A3D" stroke-width="1.6"/>
+<text x="50" y="42" class="lbl" font-weight="700">apps/web — Vite + React PWA</text>
+<rect x="50" y="55" width="150" height="34" rx="5" class="actorbox"/><text x="125" y="76" text-anchor="middle" class="lbl sm">Pages (Farmer/Buyer/Admin)</text>
+<rect x="215" y="55" width="175" height="34" rx="5" class="actorbox"/><text x="302" y="76" text-anchor="middle" class="lbl sm">i18n (en/tw) + BottomNav</text>
+<rect x="50" y="100" width="150" height="34" rx="5" class="actorbox"/><text x="125" y="121" text-anchor="middle" class="lbl sm">authStore (Zustand)</text>
+<rect x="215" y="100" width="175" height="34" rx="5" class="actorbox"/><text x="302" y="121" text-anchor="middle" class="lbl sm">React Query cache</text>
+<rect x="50" y="145" width="340" height="34" rx="5" class="actorbox"/><text x="220" y="166" text-anchor="middle" class="lbl sm">apiClient (axios + silent-refresh interceptor)</text>
+
+<rect x="490" y="20" width="380" height="290" rx="8" fill="#f7fbf8" stroke="#1B7A3D" stroke-width="1.6"/>
+<text x="510" y="42" class="lbl" font-weight="700">apps/api — Express (TypeScript)</text>
+<rect x="510" y="55" width="90" height="30" rx="5" class="actorbox"/><text x="555" y="75" text-anchor="middle" class="lbl sm">Auth</text>
+<rect x="608" y="55" width="90" height="30" rx="5" class="actorbox"/><text x="653" y="75" text-anchor="middle" class="lbl sm">Users</text>
+<rect x="706" y="55" width="145" height="30" rx="5" class="actorbox"/><text x="778" y="75" text-anchor="middle" class="lbl sm">Listings</text>
+<rect x="510" y="93" width="90" height="30" rx="5" class="actorbox"/><text x="555" y="113" text-anchor="middle" class="lbl sm">Orders</text>
+<rect x="608" y="93" width="90" height="30" rx="5" class="actorbox"/><text x="653" y="113" text-anchor="middle" class="lbl sm">Prices</text>
+<rect x="706" y="93" width="145" height="30" rx="5" class="actorbox"/><text x="778" y="113" text-anchor="middle" class="lbl sm">Advisory</text>
+<rect x="510" y="131" width="145" height="30" rx="5" class="actorbox"/><text x="582" y="151" text-anchor="middle" class="lbl sm">Notifications</text>
+<rect x="663" y="131" width="90" height="30" rx="5" class="actorbox"/><text x="708" y="151" text-anchor="middle" class="lbl sm">Co-ops</text>
+<rect x="761" y="131" width="90" height="30" rx="5" class="actorbox"/><text x="806" y="151" text-anchor="middle" class="lbl sm">Admin</text>
+<rect x="510" y="169" width="145" height="30" rx="5" class="actorbox"/><text x="582" y="189" text-anchor="middle" class="lbl sm">SMS-Gateway</text>
+<rect x="663" y="169" width="90" height="30" rx="5" class="actorbox"/><text x="708" y="189" text-anchor="middle" class="lbl sm">Uploads</text>
+<rect x="761" y="169" width="90" height="30" rx="5" class="actorbox"/><text x="806" y="189" text-anchor="middle" class="lbl sm">Ratings</text>
+<rect x="510" y="215" width="341" height="32" rx="5" fill="#eef1f4" stroke="#334155"/><text x="680" y="235" text-anchor="middle" class="lbl sm">middleware: requireAuth · requireRole · validateBody/Query</text>
+<rect x="510" y="255" width="341" height="32" rx="5" fill="#eef1f4" stroke="#334155"/><text x="680" y="275" text-anchor="middle" class="lbl sm">lib: prisma client · redis client · geo (Haversine) · asyncHandler</text>
+
+<rect x="330" y="400" width="240" height="50" rx="8" fill="#f4f0ff" stroke="#6d4aab" stroke-width="1.4"/>
+<text x="450" y="422" text-anchor="middle" class="lbl" font-weight="700">packages/shared</text>
+<text x="450" y="438" text-anchor="middle" class="lbl sm">enums, crop metadata, zod schemas</text>
+
+<rect x="30" y="340" width="220" height="50" rx="8" class="databox"/>
+<text x="140" y="360" text-anchor="middle" class="lbl" font-weight="700">PostgreSQL / Redis</text>
+<text x="140" y="376" text-anchor="middle" class="lbl sm">via Prisma / ioredis</text>
+
+<rect x="630" y="340" width="240" height="50" rx="8" class="extbox"/>
+<text x="750" y="360" text-anchor="middle" class="lbl" font-weight="700">Gemini · Weather · SMS</text>
+<text x="750" y="376" text-anchor="middle" class="lbl sm">external provider SDKs/REST clients</text>
+
+<line x1="410" y1="115" x2="490" y2="115" class="msg" marker-end="url(#ar2)"/>
+<text x="415" y="105" class="lbl sm">HTTPS REST</text>
+<line x1="140" y1="210" x2="400" y2="400" class="msg" style="stroke-dasharray:4 4" marker-end="url(#ar2)"/>
+<line x1="670" y1="310" x2="500" y2="400" class="msg" style="stroke-dasharray:4 4" marker-end="url(#ar2)"/>
+<text x="530" y="400" class="lbl sm">compiled-in types/validators</text>
+<line x1="200" y1="390" x2="140" y2="340" class="msg" marker-end="url(#ar2)"/>
+<line x1="680" y1="310" x2="750" y2="340" class="msg" marker-end="url(#ar2)"/>
+</svg>
+<figcaption>Figure 3.1 — Component diagram. Solid arrows are runtime calls; dashed arrows are compile-time dependencies on <code class="inline">packages/shared</code>, the single source of truth for enums (Role, OrderStatus, ListingStatus...) and zod validation schemas used by both apps.</figcaption>
+</figure>
+</section>
+
+<!-- ============ 4. USE CASE ============ -->
+<section class="section" id="d4">
+<div class="runhead">FarmConnect Ghana · Design Documentation</div>
+<h1>4. Use-Case Diagram &amp; Descriptions</h1>
+
+<figure class="no-break">
+<svg viewBox="0 0 900 560" role="img" aria-label="Use case diagram with Farmer, Buyer, Administrator and reserved Extension Officer actors connected to system use cases inside the FarmConnect Ghana boundary.">
+<defs>
+  <marker id="ar3" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#4b5a52"/></marker>
+  <g id="stick">
+    <circle cx="0" cy="0" r="9" fill="none" stroke="#14532d" stroke-width="2"/>
+    <line x1="0" y1="9" x2="0" y2="38" stroke="#14532d" stroke-width="2"/>
+    <line x1="-16" y1="20" x2="16" y2="20" stroke="#14532d" stroke-width="2"/>
+    <line x1="0" y1="38" x2="-14" y2="60" stroke="#14532d" stroke-width="2"/>
+    <line x1="0" y1="38" x2="14" y2="60" stroke="#14532d" stroke-width="2"/>
+  </g>
+</defs>
+
+<use href="#stick" x="60" y="90"/><text x="60" y="168" text-anchor="middle" class="lbl" font-weight="700">Farmer</text>
+<use href="#stick" x="60" y="330"/><text x="60" y="408" text-anchor="middle" class="lbl" font-weight="700">Buyer</text>
+<use href="#stick" x="840" y="150" transform="scale(-1,1) translate(-1680,0)"/><text x="840" y="228" text-anchor="middle" class="lbl" font-weight="700">Administrator</text>
+<g opacity="0.55"><use href="#stick" x="840" y="410" transform="scale(-1,1) translate(-1680,0)"/><text x="840" y="488" text-anchor="middle" class="lbl">Extension Officer</text><text x="840" y="500" text-anchor="middle" class="lbl sm">(reserved role, §11)</text></g>
+
+<rect x="175" y="20" width="550" height="500" rx="12" fill="none" stroke="#1B7A3D" stroke-width="1.6" stroke-dasharray="0"/>
+<text x="450" y="14" text-anchor="middle" class="lbl" font-weight="700">FarmConnect Ghana</text>
+
+<ellipse cx="300" cy="65" rx="105" ry="26" class="actorbox"/><text x="300" y="69" text-anchor="middle" class="lbl">UC-00 Register &amp; select role</text>
+<ellipse cx="300" cy="140" rx="105" ry="26" class="actorbox"/><text x="300" y="144" text-anchor="middle" class="lbl">UC-01 List produce</text>
+<ellipse cx="300" cy="215" rx="105" ry="26" class="actorbox"/><text x="300" y="219" text-anchor="middle" class="lbl">UC-05 Form/join co-op</text>
+<ellipse cx="450" cy="290" rx="110" ry="28" class="actorbox"/><text x="450" y="286" text-anchor="middle" class="lbl">UC-04 Get crop advice</text><text x="450" y="300" text-anchor="middle" class="lbl sm">(shared: Farmer + Buyer)</text>
+<ellipse cx="600" cy="140" rx="105" ry="26" class="actorbox"/><text x="600" y="144" text-anchor="middle" class="lbl">UC-02 Search &amp; order</text>
+<ellipse cx="600" cy="215" rx="105" ry="26" class="actorbox"/><text x="600" y="219" text-anchor="middle" class="lbl">UC-03 Pay &amp; confirm</text>
+<ellipse cx="450" cy="380" rx="115" ry="26" class="actorbox"/><text x="450" y="384" text-anchor="middle" class="lbl">UC-06 Resolve a dispute</text>
+<ellipse cx="450" cy="450" rx="115" ry="26" class="actorbox"/><text x="450" y="454" text-anchor="middle" class="lbl">UC-07 Moderate platform</text>
+
+<line x1="95" y1="105" x2="195" y2="65" stroke="#4b5a52"/>
+<line x1="95" y1="105" x2="195" y2="140" stroke="#4b5a52"/>
+<line x1="95" y1="105" x2="195" y2="215" stroke="#4b5a52"/>
+<line x1="95" y1="105" x2="345" y2="270" stroke="#4b5a52"/>
+<line x1="95" y1="345" x2="195" y2="65" stroke="#4b5a52"/>
+<line x1="95" y1="345" x2="495" y2="140" stroke="#4b5a52"/>
+<line x1="95" y1="345" x2="495" y2="215" stroke="#4b5a52"/>
+<line x1="95" y1="345" x2="380" y2="300" stroke="#4b5a52"/>
+<line x1="805" y1="165" x2="565" y2="380" stroke="#4b5a52"/>
+<line x1="805" y1="165" x2="565" y2="450" stroke="#4b5a52"/>
+</svg>
+<figcaption>Figure 4.1 — Use-case diagram. UC-04 is shared by both Farmer and Buyer; UC-06 (dispute) involves Buyer, Farmer, and Admin but is drawn once and cross-referenced in the table below to avoid line clutter. The Extension Officer actor is shown at reduced opacity — reserved in the role model, not connected to any implemented use case (SRS §9.3).</figcaption>
+</figure>
+
+<table>
+<thead><tr><th style="width:11%">Use case</th><th style="width:16%">Primary actor(s)</th><th>Preconditions → main flow → postcondition</th></tr></thead>
+<tbody>
+<tr><td>UC-00</td><td>Farmer, Buyer</td><td>None → phone+OTP verified, role chosen (Farmer/Buyer only) → session issued (access+refresh JWT).</td></tr>
+<tr><td>UC-01</td><td>Farmer</td><td>Mobile Money linked → crop/qty/price/photos/location submitted → listing <code class="inline">ACTIVE</code>, visible in marketplace search.</td></tr>
+<tr><td>UC-02</td><td>Buyer</td><td>Listing <code class="inline">ACTIVE</code> → buyer searches/filters, opens detail, places order → order <code class="inline">pending</code>, listing <code class="inline">PENDING</code>.</td></tr>
+<tr><td>UC-03</td><td>Buyer, Farmer, (Admin)</td><td>Order <code class="inline">pending</code> → buyer pays via own MoMo app, submits txn ID → farmer confirms/rejects → (optional) buyer disputes → admin resolves → buyer confirms delivery → order <code class="inline">delivered</code>, listing <code class="inline">SOLD</code>.</td></tr>
+<tr><td>UC-04</td><td>Farmer, Buyer</td><td>User authenticated → sends text and/or photo → advisor (Gemini, weather-aware) replies → exchange persisted to chat history.</td></tr>
+<tr><td>UC-05</td><td>Farmer</td><td>Not already in a co-op → create (become leader) or join via code (become member) → co-op membership active; listings may be attributed to it.</td></tr>
+<tr><td>UC-06</td><td>Buyer, Farmer, Admin</td><td>Order <code class="inline">payment_rejected</code> → buyer raises dispute → order <code class="inline">disputed</code> → admin resolves (uphold payment/rejection) → order <code class="inline">paid</code> or <code class="inline">cancelled</code>, both notified.</td></tr>
+<tr><td>UC-07</td><td>Admin</td><td>Admin authenticated → verify/suspend a user or force a listing's status → change applied immediately, affected user notified.</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ============ 5. CLASS DIAGRAM ============ -->
+<section class="section" id="d5">
+<div class="runhead">FarmConnect Ghana · Design Documentation</div>
+<h1>5. Class Diagram</h1>
+<p>A logical, object-oriented view of the core domain (attributes trimmed to the most salient fields — see §6 for the full field-level relational schema). Enumerations are shown as UML «enumeration» classes attached by dependency to the classes that use them.</p>
+
+<figure class="no-break">
+<svg viewBox="0 0 960 640" role="img" aria-label="Class diagram of User, Listing, Order, Rating, CoopGroup and CoopMember with their attributes, associations and multiplicities, plus enumeration classes for Role, OrderStatus and ListingStatus.">
+<defs><marker id="ar4" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#334155"/></marker></defs>
+
+<!-- User -->
+<rect x="380" y="20" width="220" height="150" fill="#fff" stroke="#334155" stroke-width="1.4"/>
+<rect x="380" y="20" width="220" height="26" fill="#eef6ee" stroke="#334155"/><text x="490" y="38" text-anchor="middle" class="lbl" font-weight="700">User</text>
+<line x1="380" y1="46" x2="600" y2="46" stroke="#334155"/>
+<text x="388" y="60" class="lbl sm">id, phone, role, locale</text>
+<text x="388" y="73" class="lbl sm">name, trustScore, ratingCount</text>
+<text x="388" y="86" class="lbl sm">isVerified, isSuspended</text>
+<text x="388" y="99" class="lbl sm">momoProvider/Phone/AccountName</text>
+<line x1="380" y1="108" x2="600" y2="108" stroke="#334155"/>
+<text x="388" y="122" class="lbl sm">+updateMomo() +setVerified()</text>
+<text x="388" y="135" class="lbl sm">+setSuspended()</text>
+
+<!-- enums -->
+<rect x="650" y="20" width="150" height="60" fill="#f4f0ff" stroke="#6d4aab" stroke-width="1.2"/>
+<text x="725" y="36" text-anchor="middle" class="lbl sm" font-style="italic">«enumeration»</text>
+<text x="725" y="50" text-anchor="middle" class="lbl" font-weight="700">Role</text>
+<text x="725" y="66" text-anchor="middle" class="lbl sm">FARMER/BUYER/ADMIN/EXTENSION</text>
+<line x1="600" y1="50" x2="650" y2="50" stroke="#6d4aab" stroke-dasharray="4 3" marker-end="url(#ar4)"/>
+
+<!-- Listing -->
+<rect x="60" y="230" width="220" height="150" fill="#fff" stroke="#334155" stroke-width="1.4"/>
+<rect x="60" y="230" width="220" height="26" fill="#eef6ee" stroke="#334155"/><text x="170" y="248" text-anchor="middle" class="lbl" font-weight="700">Listing</text>
+<line x1="60" y1="256" x2="280" y2="256" stroke="#334155"/>
+<text x="68" y="270" class="lbl sm">id, cropType, quantityKg</text>
+<text x="68" y="283" class="lbl sm">pricePerKg, harvestDate</text>
+<text x="68" y="296" class="lbl sm">photos[], lat, lng, regionLabel</text>
+<text x="68" y="309" class="lbl sm">status, coopId?</text>
+<line x1="60" y1="318" x2="280" y2="318" stroke="#334155"/>
+<text x="68" y="332" class="lbl sm">+publish() +update() +remove()</text>
+
+<rect x="60" y="410" width="150" height="46" fill="#f4f0ff" stroke="#6d4aab" stroke-width="1.2"/>
+<text x="135" y="426" text-anchor="middle" class="lbl sm" font-style="italic">«enumeration»</text>
+<text x="135" y="442" text-anchor="middle" class="lbl" font-weight="700">ListingStatus</text>
+<line x1="150" y1="380" x2="150" y2="410" stroke="#6d4aab" stroke-dasharray="4 3" marker-end="url(#ar4)"/>
+
+<!-- Order -->
+<rect x="360" y="230" width="260" height="180" fill="#fff" stroke="#334155" stroke-width="1.4"/>
+<rect x="360" y="230" width="260" height="26" fill="#eef6ee" stroke="#334155"/><text x="490" y="248" text-anchor="middle" class="lbl" font-weight="700">Order</text>
+<line x1="360" y1="256" x2="620" y2="256" stroke="#334155"/>
+<text x="368" y="270" class="lbl sm">id, quantityKg, subtotal, deliveryFee, total</text>
+<text x="368" y="283" class="lbl sm">status, sellerMomo{Provider,Phone,Name}</text>
+<text x="368" y="296" class="lbl sm">buyerMomoPhone?, transactionId?</text>
+<text x="368" y="309" class="lbl sm">disputeReason?, disputeResolution?</text>
+<line x1="360" y1="318" x2="620" y2="318" stroke="#334155"/>
+<text x="368" y="332" class="lbl sm">+submitPayment() +confirmPayment()</text>
+<text x="368" y="345" class="lbl sm">+rejectPayment() +dispute()</text>
+<text x="368" y="358" class="lbl sm">+resolveDispute() +confirmDelivery()</text>
+
+<rect x="650" y="230" width="150" height="46" fill="#f4f0ff" stroke="#6d4aab" stroke-width="1.2"/>
+<text x="725" y="246" text-anchor="middle" class="lbl sm" font-style="italic">«enumeration»</text>
+<text x="725" y="262" text-anchor="middle" class="lbl" font-weight="700">OrderStatus</text>
+<line x1="620" y1="253" x2="650" y2="253" stroke="#6d4aab" stroke-dasharray="4 3" marker-end="url(#ar4)"/>
+
+<!-- Rating -->
+<rect x="530" y="460" width="220" height="110" fill="#fff" stroke="#334155" stroke-width="1.4"/>
+<rect x="530" y="460" width="220" height="26" fill="#eef6ee" stroke="#334155"/><text x="640" y="478" text-anchor="middle" class="lbl" font-weight="700">Rating</text>
+<line x1="530" y1="486" x2="750" y2="486" stroke="#334155"/>
+<text x="538" y="500" class="lbl sm">id, orderId, raterId, ratedId</text>
+<text x="538" y="513" class="lbl sm">stars (1-5), comment?, createdAt</text>
+<line x1="530" y1="522" x2="750" y2="522" stroke="#334155"/>
+<text x="538" y="536" class="lbl sm">unique(orderId, raterId)</text>
+
+<!-- CoopGroup -->
+<rect x="300" y="460" width="200" height="110" fill="#fff" stroke="#334155" stroke-width="1.4"/>
+<rect x="300" y="460" width="200" height="26" fill="#eef6ee" stroke="#334155"/><text x="400" y="478" text-anchor="middle" class="lbl" font-weight="700">CoopGroup</text>
+<line x1="300" y1="486" x2="500" y2="486" stroke="#334155"/>
+<text x="308" y="500" class="lbl sm">id, name, joinCode</text>
+<line x1="300" y1="509" x2="500" y2="509" stroke="#334155"/>
+<text x="308" y="523" class="lbl sm">+dissolve() (auto, when empty)</text>
+
+<!-- associations -->
+<line x1="380" y1="95" x2="280" y2="290" class="msg"/><text x="290" y="220" class="lbl sm">1</text><text x="335" y="222" class="lbl sm">0..*</text><text x="330" y="180" class="lbl sm">farmer</text>
+<line x1="490" y1="170" x2="490" y2="230" class="msg"/><text x="497" y="200" class="lbl sm">buyer 1 / farmer 1 — 0..*</text>
+<line x1="280" y1="310" x2="360" y2="290" class="msg"/><text x="292" y="295" class="lbl sm">1</text><text x="345" y="295" class="lbl sm">0..*</text>
+<line x1="490" y1="410" x2="600" y2="460" class="msg"/><text x="497" y="440" class="lbl sm">1 — 0..2</text>
+<line x1="270" y1="380" x2="320" y2="460" class="msg" style="stroke-dasharray:4 4"/><text x="280" y="428" class="lbl sm">0..1 attribution</text>
+<path d="M390,170 L30,170 L30,540 L300,540" class="msg"/><text x="140" y="195" class="lbl sm">1 user — 0..1 membership</text>
+</svg>
+<figcaption>Figure 5.1 — Simplified class diagram. Full attribute lists, exact types, and every relation (including <code class="inline">Notification</code>, <code class="inline">ChatMessage</code>, <code class="inline">PriceSnapshot</code>, <code class="inline">SmsInboundLog</code>, and <code class="inline">CoopMember</code>) are given in the Entity-Relationship diagram and Database Design tables (§6), which is the authoritative field-level reference.</figcaption>
+</figure>
+</section>
+
+<!-- ============ 6. ERD ============ -->
+<section class="section" id="d6">
+<div class="runhead">FarmConnect Ghana · Design Documentation</div>
+<h1>6. Entity-Relationship Diagram &amp; Database Design</h1>
+
+<figure class="no-break">
+<svg viewBox="0 0 960 660" role="img" aria-label="Entity relationship diagram of all ten tables with primary keys, foreign keys and cardinalities.">
+<defs><marker id="crow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse"><path d="M0,0L10,5L0,10" fill="none" stroke="#1d4e89" stroke-width="1.4"/></marker></defs>
+<style>.tbl{fill:#fff;stroke:#1d4e89;stroke-width:1.2}.thd{fill:#eaf2ff;stroke:#1d4e89}.rel{stroke:#1d4e89;stroke-width:1.1;fill:none}</style>
+
+<!-- users -->
+<rect class="tbl" x="380" y="15" width="200" height="150"/><rect class="thd" x="380" y="15" width="200" height="24"/>
+<text x="480" y="32" text-anchor="middle" class="lbl" font-weight="700">users</text>
+<text x="388" y="52" class="lbl sm">PK id</text><text x="388" y="65" class="lbl sm">phone (unique)</text>
+<text x="388" y="78" class="lbl sm">role, locale</text><text x="388" y="91" class="lbl sm">trustScore, ratingCount</text>
+<text x="388" y="104" class="lbl sm">isVerified, isSuspended</text><text x="388" y="117" class="lbl sm">momoProvider/Phone/Name</text>
+<text x="388" y="130" class="lbl sm">createdAt, updatedAt</text>
+
+<!-- listings -->
+<rect class="tbl" x="60" y="220" width="200" height="120"/><rect class="thd" x="60" y="220" width="200" height="24"/>
+<text x="160" y="237" text-anchor="middle" class="lbl" font-weight="700">listings</text>
+<text x="68" y="257" class="lbl sm">PK id · FK farmerId → users</text>
+<text x="68" y="270" class="lbl sm">FK coopId? → coop_groups</text>
+<text x="68" y="283" class="lbl sm">cropType, quantityKg, pricePerKg</text>
+<text x="68" y="296" class="lbl sm">photos[], lat, lng, status</text>
+<text x="68" y="309" class="lbl sm">idx: farmerId, cropType, status, coopId</text>
+
+<!-- orders -->
+<rect class="tbl" x="340" y="220" width="260" height="150"/><rect class="thd" x="340" y="220" width="260" height="24"/>
+<text x="470" y="237" text-anchor="middle" class="lbl" font-weight="700">orders</text>
+<text x="348" y="257" class="lbl sm">PK id · FK listingId → listings</text>
+<text x="348" y="270" class="lbl sm">FK buyerId, farmerId → users</text>
+<text x="348" y="283" class="lbl sm">status, subtotal, deliveryFee, total</text>
+<text x="348" y="296" class="lbl sm">sellerMomo{Provider,Phone,AcctName}</text>
+<text x="348" y="309" class="lbl sm">buyerMomoPhone?, transactionId?</text>
+<text x="348" y="322" class="lbl sm">disputeReason?, disputeResolution?</text>
+<text x="348" y="335" class="lbl sm">idx: buyerId, farmerId, listingId, status</text>
+
+<!-- ratings -->
+<rect class="tbl" x="660" y="220" width="230" height="120"/><rect class="thd" x="660" y="220" width="230" height="24"/>
+<text x="775" y="237" text-anchor="middle" class="lbl" font-weight="700">ratings</text>
+<text x="668" y="257" class="lbl sm">PK id · FK orderId → orders</text>
+<text x="668" y="270" class="lbl sm">FK raterId, ratedId → users</text>
+<text x="668" y="283" class="lbl sm">stars, comment?, createdAt</text>
+<text x="668" y="296" class="lbl sm">unique(orderId, raterId) · idx ratedId</text>
+
+<!-- coop_groups -->
+<rect class="tbl" x="20" y="400" width="190" height="90"/><rect class="thd" x="20" y="400" width="190" height="24"/>
+<text x="115" y="417" text-anchor="middle" class="lbl" font-weight="700">coop_groups</text>
+<text x="28" y="437" class="lbl sm">PK id · name · joinCode (unique)</text>
+<text x="28" y="450" class="lbl sm">createdAt</text>
+
+<!-- coop_members -->
+<rect class="tbl" x="240" y="400" width="200" height="100"/><rect class="thd" x="240" y="400" width="200" height="24"/>
+<text x="340" y="417" text-anchor="middle" class="lbl" font-weight="700">coop_members</text>
+<text x="248" y="437" class="lbl sm">PK id · FK coopId → coop_groups</text>
+<text x="248" y="450" class="lbl sm">FK userId → users (unique)</text>
+<text x="248" y="463" class="lbl sm">role (LEADER/MEMBER), joinedAt</text>
+
+<!-- chat_messages -->
+<rect class="tbl" x="470" y="400" width="200" height="90"/><rect class="thd" x="470" y="400" width="200" height="24"/>
+<text x="570" y="417" text-anchor="middle" class="lbl" font-weight="700">chat_messages</text>
+<text x="478" y="437" class="lbl sm">PK id · FK userId → users</text>
+<text x="478" y="450" class="lbl sm">role, content, imageUrl?, createdAt</text>
+
+<!-- notifications -->
+<rect class="tbl" x="700" y="400" width="220" height="100"/><rect class="thd" x="700" y="400" width="220" height="24"/>
+<text x="810" y="417" text-anchor="middle" class="lbl" font-weight="700">notifications</text>
+<text x="708" y="437" class="lbl sm">PK id · FK userId → users</text>
+<text x="708" y="450" class="lbl sm">type, channel, title, body, read</text>
+<text x="708" y="463" class="lbl sm">idx userId</text>
+
+<!-- price_snapshots -->
+<rect class="tbl" x="60" y="540" width="220" height="80"/><rect class="thd" x="60" y="540" width="220" height="24"/>
+<text x="170" y="557" text-anchor="middle" class="lbl" font-weight="700">price_snapshots</text>
+<text x="68" y="577" class="lbl sm">PK id · cropType, pricePerKg</text>
+<text x="68" y="590" class="lbl sm">recordedAt · no FK (standalone) · idx(cropType, recordedAt)</text>
+
+<!-- sms_inbound_logs -->
+<rect class="tbl" x="320" y="540" width="240" height="80"/><rect class="thd" x="320" y="540" width="240" height="24"/>
+<text x="440" y="557" text-anchor="middle" class="lbl" font-weight="700">sms_inbound_logs</text>
+<text x="328" y="577" class="lbl sm">PK id · fromPhone (raw, no FK)</text>
+<text x="328" y="590" class="lbl sm">rawText, parsedCommand?, responseText</text>
+
+<!-- relations: only the illustrative ones are drawn as crow's-foot lines, kept to the gutters between
+     rows so nothing crosses a table box. Every other relation is still fully specified — as an "FK ... →
+     ..." line inside the referencing table itself (see boxes above) — this diagram just avoids drawing
+     a line for every one of those to keep the figure legible. -->
+<path class="rel" d="M380,90 L260,260" marker-end="url(#crow)"/><text x="250" y="185" class="lbl sm">1 farmer — 0..* listings</text>
+<path class="rel" d="M480,165 L480,220" marker-end="url(#crow)"/><text x="490" y="200" class="lbl sm">1 buyer/farmer — 0..* orders</text>
+<path class="rel" d="M260,300 L340,300" marker-end="url(#crow)"/><text x="266" y="293" class="lbl sm">0..*</text>
+<path class="rel" d="M600,290 L660,290" marker-end="url(#crow)"/><text x="606" y="283" class="lbl sm">0..2</text>
+<path class="rel" d="M380,175 L740,220" marker-end="url(#crow)"/><text x="600" y="215" class="lbl sm">1 user — 0..* ratings received</text>
+<path class="rel" d="M145,340 L115,400" marker-end="url(#crow)"/><text x="118" y="378" class="lbl sm">0..1 attribution</text>
+</svg>
+<figcaption>Figure 6.1 — Full entity-relationship diagram (all 10 tables). Only the most illustrative cardinalities are drawn as crow's-foot lines; every other foreign key (e.g. <code class="inline">coop_members.userId</code>, <code class="inline">chat_messages.userId</code>, <code class="inline">notifications.userId</code>) is stated as text inside its table above. <code class="inline">price_snapshots</code> and <code class="inline">sms_inbound_logs</code> are intentionally standalone time-series/audit tables with no foreign key at all.</figcaption>
+</figure>
+
+<h2>Database Design Notes</h2>
+<ul>
+<li><strong>Engine:</strong> PostgreSQL 16, accessed exclusively through Prisma ORM (typed client, migration history in <code class="inline">apps/api/prisma/migrations/</code> — 7 migrations tracing the phase-by-phase schema growth from <code class="inline">init</code> to <code class="inline">add_phase6_ratings_coops_admin</code>).</li>
+<li><strong>Primary keys:</strong> all tables use <code class="inline">cuid()</code> string IDs (collision-resistant, sortable-ish, no auto-increment leakage of row counts).</li>
+<li><strong>Money fields:</strong> <code class="inline">Decimal(10,2)</code>, never floating point — <code class="inline">pricePerKg</code>, <code class="inline">subtotal</code>, <code class="inline">deliveryFee</code>, <code class="inline">total</code>.</li>
+<li><strong>Data integrity by constraint, not just application logic:</strong> <code class="inline">users.phone</code> unique; <code class="inline">coop_members.userId</code> unique (enforces "at most one co-op per farmer" at the database level, not just in the service layer); <code class="inline">ratings</code> unique on <code class="inline">(orderId, raterId)</code> (enforces "one rating per rater per order").</li>
+<li><strong>Indexes:</strong> added on every foreign key used in a hot lookup path (<code class="inline">farmerId</code>, <code class="inline">buyerId</code>, <code class="inline">status</code>, <code class="inline">cropType</code>, <code class="inline">userId</code>) — see per-table notes in Figure 6.1.</li>
+<li><strong>No PostGIS:</strong> listings store plain <code class="inline">lat</code>/<code class="inline">lng</code> floats; radius search and sorting are computed in application code via a Haversine helper (<code class="inline">lib/geo.ts</code>) after a non-geo-filtered fetch — an explicit, documented simplification appropriate at capstone scale (SRS §9.8-adjacent).</li>
+</ul>
+</section>
+
+<!-- ============ 7. SEQUENCE DIAGRAMS ============ -->
+<section class="section" id="d7">
+<div class="runhead">FarmConnect Ghana · Design Documentation</div>
+<h1>7. Sequence Diagrams</h1>
+
+<h2>7.1 Authentication — OTP login and token refresh</h2>
+<figure class="no-break">
+<svg viewBox="0 0 900 430" role="img" aria-label="Sequence diagram of phone OTP login followed by a silent token refresh.">
+<!-- lifelines -->
+<g font-size="10.4">
+<rect x="20" y="10" width="120" height="30" rx="5" class="actorbox"/><text x="80" y="30" text-anchor="middle" class="lbl">User</text>
+<rect x="200" y="10" width="120" height="30" rx="5" class="actorbox"/><text x="260" y="30" text-anchor="middle" class="lbl">Web PWA</text>
+<rect x="380" y="10" width="120" height="30" rx="5" class="sysbox"/><text x="440" y="30" text-anchor="middle" class="lbl wt" fill="#1f2a24">API</text>
+<rect x="560" y="10" width="120" height="30" rx="5" class="databox"/><text x="620" y="30" text-anchor="middle" class="lbl">Redis</text>
+<rect x="740" y="10" width="140" height="30" rx="5" class="extbox"/><text x="810" y="30" text-anchor="middle" class="lbl">GiantSMS</text>
+</g>
+<line x1="80" y1="40" x2="80" y2="420" class="lifeline"/>
+<line x1="260" y1="40" x2="260" y2="420" class="lifeline"/>
+<line x1="440" y1="40" x2="440" y2="420" class="lifeline"/>
+<line x1="620" y1="40" x2="620" y2="420" class="lifeline"/>
+<line x1="810" y1="40" x2="810" y2="420" class="lifeline"/>
+
+<line x1="80" y1="60" x2="260" y2="60" class="msg" marker-end="url(#ar1)"/><text x="85" y="55" class="lbl sm">1. enters phone number</text>
+<line x1="260" y1="85" x2="440" y2="85" class="msg" marker-end="url(#ar1)"/><text x="265" y="80" class="lbl sm">2. POST /auth/otp/request</text>
+<line x1="440" y1="110" x2="620" y2="110" class="msg" marker-end="url(#ar1)"/><text x="445" y="105" class="lbl sm">3. SET otp:&lt;phone&gt; = bcrypt(code), TTL 300s</text>
+<line x1="440" y1="135" x2="810" y2="135" class="msg ext" marker-end="url(#ar1)"/><text x="445" y="130" class="lbl sm">4. send OTP SMS</text>
+<line x1="810" y1="160" x2="80" y2="160" class="msg ext" marker-end="url(#ar1)"/><text x="200" y="155" class="lbl sm">5. SMS delivered to user's phone</text>
+<line x1="80" y1="185" x2="260" y2="185" class="msg" marker-end="url(#ar1)"/><text x="85" y="180" class="lbl sm">6. enters 6-digit code</text>
+<line x1="260" y1="210" x2="440" y2="210" class="msg" marker-end="url(#ar1)"/><text x="265" y="205" class="lbl sm">7. POST /auth/otp/verify</text>
+<line x1="440" y1="235" x2="620" y2="235" class="msg" marker-end="url(#ar1)"/><text x="445" y="230" class="lbl sm">8. compare hash, DEL key (single-use)</text>
+<line x1="440" y1="260" x2="260" y2="260" class="msg ret" marker-end="url(#ar1)"/><text x="270" y="255" class="lbl sm">9. 200 {accessToken, refreshToken, user}</text>
+
+<rect x="55" y="285" width="800" height="115" rx="6" fill="none" stroke="#94a3b8" stroke-dasharray="3 3"/>
+<text x="65" y="300" class="lbl sm" font-style="italic">later — access token expires (12h)</text>
+<line x1="260" y1="320" x2="440" y2="320" class="msg" marker-end="url(#ar1)"/><text x="265" y="315" class="lbl sm">10. any request → 401 TOKEN_EXPIRED</text>
+<line x1="260" y1="345" x2="440" y2="345" class="msg" marker-end="url(#ar1)"/><text x="265" y="340" class="lbl sm">11. POST /auth/refresh {refreshToken}</text>
+<line x1="440" y1="365" x2="620" y2="365" class="msg" marker-end="url(#ar1)"/><text x="445" y="360" class="lbl sm">12. verify jti in allowlist, DEL old, SET new</text>
+<line x1="440" y1="388" x2="260" y2="388" class="msg ret" marker-end="url(#ar1)"/><text x="270" y="383" class="lbl sm">13. new token pair → original request retried once</text>
+</svg>
+<figcaption>Figure 7.1 — OTP login followed by the single-use, rotating refresh-token flow. Non-production environments also return a plaintext <code class="inline">devCode</code> at step 3 to make demoing/testing possible without a live SMS credential.</figcaption>
+</figure>
+
+<h2>7.2 Order lifecycle — manual Mobile Money reconciliation</h2>
+<figure class="no-break">
+<svg viewBox="0 0 900 460" role="img" aria-label="Sequence diagram of a buyer placing an order, paying via mobile money outside the app, the farmer confirming or rejecting, and the dispute path to an administrator.">
+<g font-size="10.4">
+<rect x="10" y="10" width="110" height="30" rx="5" class="actorbox"/><text x="65" y="30" text-anchor="middle" class="lbl">Buyer</text>
+<rect x="170" y="10" width="120" height="30" rx="5" class="sysbox"/><text x="230" y="30" text-anchor="middle" class="lbl">API</text>
+<rect x="340" y="10" width="120" height="30" rx="5" class="databox"/><text x="400" y="30" text-anchor="middle" class="lbl">DB</text>
+<rect x="510" y="10" width="130" height="30" rx="5" class="extbox"/><text x="575" y="30" text-anchor="middle" class="lbl">Buyer's MoMo app</text>
+<rect x="690" y="10" width="110" height="30" rx="5" class="actorbox"/><text x="745" y="30" text-anchor="middle" class="lbl">Farmer</text>
+<rect x="800" y="60" width="90" height="30" rx="5" class="actorbox"/><text x="845" y="80" text-anchor="middle" class="lbl">Admin</text>
+</g>
+<line x1="65" y1="40" x2="65" y2="450" class="lifeline"/>
+<line x1="230" y1="40" x2="230" y2="450" class="lifeline"/>
+<line x1="400" y1="40" x2="400" y2="450" class="lifeline"/>
+<line x1="575" y1="40" x2="575" y2="450" class="lifeline"/>
+<line x1="745" y1="40" x2="745" y2="450" class="lifeline"/>
+<line x1="845" y1="90" x2="845" y2="450" class="lifeline"/>
+
+<line x1="65" y1="60" x2="230" y2="60" class="msg" marker-end="url(#ar1)"/><text x="70" y="55" class="lbl sm">1. POST /orders {listingId, qty}</text>
+<line x1="230" y1="82" x2="400" y2="82" class="msg" marker-end="url(#ar1)"/><text x="235" y="77" class="lbl sm">2. create order(pending), snapshot seller momo, listing→PENDING</text>
+<line x1="230" y1="104" x2="745" y2="104" class="msg ret" marker-end="url(#ar1)"/><text x="240" y="99" class="lbl sm">3. notify farmer: new order</text>
+<line x1="65" y1="130" x2="575" y2="130" class="msg ext" marker-end="url(#ar1)"/><text x="70" y="125" class="lbl sm">4. pay directly via MoMo app/USSD (outside FarmConnect)</text>
+<line x1="65" y1="155" x2="230" y2="155" class="msg" marker-end="url(#ar1)"/><text x="70" y="150" class="lbl sm">5. POST /orders/:id/submit-payment {txnId, buyerMomoPhone}</text>
+<line x1="230" y1="177" x2="400" y2="177" class="msg" marker-end="url(#ar1)"/><text x="235" y="172" class="lbl sm">6. status → payment_submitted</text>
+<line x1="230" y1="199" x2="745" y2="199" class="msg ret" marker-end="url(#ar1)"/><text x="240" y="194" class="lbl sm">7. notify farmer: verify this transaction ID</text>
+
+<rect x="45" y="220" width="820" height="90" rx="6" fill="none" stroke="#94a3b8" stroke-dasharray="3 3"/>
+<text x="55" y="235" class="lbl sm" font-style="italic">alt — farmer checks own MoMo SMS/history, then:</text>
+<line x1="745" y1="255" x2="230" y2="255" class="msg" marker-end="url(#ar1)"/><text x="250" y="250" class="lbl sm">8a. POST .../confirm-payment → status=paid</text>
+<line x1="745" y1="280" x2="230" y2="280" class="msg" marker-end="url(#ar1)"/><text x="250" y="275" class="lbl sm">8b. POST .../reject-payment{note} → status=payment_rejected</text>
+<text x="55" y="300" class="lbl sm">(8b continues below — buyer may resubmit or dispute)</text>
+
+<line x1="65" y1="330" x2="230" y2="330" class="msg" marker-end="url(#ar1)"/><text x="70" y="325" class="lbl sm">9. (if 8b) POST .../dispute{reason} → status=disputed, all admins notified</text>
+<line x1="230" y1="352" x2="845" y2="352" class="msg ret" marker-end="url(#ar1)"/>
+<line x1="845" y1="374" x2="230" y2="374" class="msg" marker-end="url(#ar1)"/><text x="250" y="369" class="lbl sm">10. POST /admin/orders/:id/resolve-dispute{resolution} → paid | cancelled</text>
+<line x1="230" y1="396" x2="65" y2="396" class="msg ret" marker-end="url(#ar1)"/>
+<line x1="230" y1="396" x2="745" y2="396" class="msg ret" marker-end="url(#ar1)"/><text x="260" y="391" class="lbl sm">11. both parties notified of outcome</text>
+<line x1="65" y1="420" x2="230" y2="420" class="msg" marker-end="url(#ar1)"/><text x="70" y="415" class="lbl sm">12. (once paid) POST .../confirm-delivery → delivered, listing=SOLD</text>
+</svg>
+<figcaption>Figure 7.2 — End-to-end order + manual Mobile Money reconciliation, including the dispute branch (SRS FR-14). FarmConnect issues every notification but never touches the payment itself — step 4 happens entirely outside the system.</figcaption>
+</figure>
+
+<h2>7.3 AI Advisory — weather-aware chat with photo pest identification</h2>
+<figure class="no-break">
+<svg viewBox="0 0 900 340" role="img" aria-label="Sequence diagram of a user sending a photo to the advisory chatbot, the API fetching cached weather and calling Gemini vision, then persisting and returning the answer.">
+<g font-size="10.4">
+<rect x="20" y="10" width="110" height="30" rx="5" class="actorbox"/><text x="75" y="30" text-anchor="middle" class="lbl">Farmer/Buyer</text>
+<rect x="200" y="10" width="110" height="30" rx="5" class="sysbox"/><text x="255" y="30" text-anchor="middle" class="lbl">API</text>
+<rect x="370" y="10" width="120" height="30" rx="5" class="databox"/><text x="430" y="30" text-anchor="middle" class="lbl">Redis / DB</text>
+<rect x="550" y="10" width="150" height="30" rx="5" class="extbox"/><text x="625" y="30" text-anchor="middle" class="lbl">OpenWeatherMap</text>
+<rect x="740" y="10" width="140" height="30" rx="5" class="extbox"/><text x="810" y="30" text-anchor="middle" class="lbl">Gemini</text>
+</g>
+<line x1="75" y1="40" x2="75" y2="330" class="lifeline"/>
+<line x1="255" y1="40" x2="255" y2="330" class="lifeline"/>
+<line x1="430" y1="40" x2="430" y2="330" class="lifeline"/>
+<line x1="625" y1="40" x2="625" y2="330" class="lifeline"/>
+<line x1="810" y1="40" x2="810" y2="330" class="lifeline"/>
+
+<line x1="75" y1="65" x2="255" y2="65" class="msg" marker-end="url(#ar1)"/><text x="80" y="60" class="lbl sm">1. POST /advisory/photo (multipart photo + text + lat/lng)</text>
+<line x1="255" y1="90" x2="255" y2="90" class="msg"/><text x="260" y="85" class="lbl sm">2. resize via sharp → 1200px (display) + 1024px b64 (vision)</text>
+<line x1="255" y1="115" x2="430" y2="115" class="msg" marker-end="url(#ar1)"/><text x="260" y="110" class="lbl sm">3. save user ChatMessage(imageUrl)</text>
+<line x1="255" y1="140" x2="430" y2="140" class="msg" marker-end="url(#ar1)"/><text x="260" y="135" class="lbl sm">4. GET weather:&lt;lat,lng&gt; cache</text>
+<line x1="430" y1="162" x2="255" y2="162" class="msg ret" marker-end="url(#ar1)"/><text x="270" y="157" class="lbl sm">5. cache miss</text>
+<line x1="255" y1="184" x2="625" y2="184" class="msg ext" marker-end="url(#ar1)"/><text x="270" y="179" class="lbl sm">6. GET current weather(lat,lng)</text>
+<line x1="625" y1="206" x2="255" y2="206" class="msg ext" marker-end="url(#ar1)"/><text x="270" y="201" class="lbl sm">7. weather data → cached 45 min</text>
+<line x1="255" y1="228" x2="810" y2="228" class="msg ext" marker-end="url(#ar1)"/><text x="270" y="223" class="lbl sm">8. chat(history + weather-augmented prompt + image)</text>
+<line x1="810" y1="253" x2="255" y2="253" class="msg ext" marker-end="url(#ar1)"/><text x="270" y="248" class="lbl sm">9. answer text (advice / pest ID)</text>
+<line x1="255" y1="275" x2="430" y2="275" class="msg" marker-end="url(#ar1)"/><text x="260" y="270" class="lbl sm">10. save assistant ChatMessage</text>
+<line x1="255" y1="297" x2="75" y2="297" class="msg ret" marker-end="url(#ar1)"/><text x="90" y="292" class="lbl sm">11. 200 {reply}</text>
+</svg>
+<figcaption>Figure 7.3 — Advisory chat with an attached photo. If <code class="inline">GEMINI_API_KEY</code> is unset the flow fails loudly at step 8 (503) rather than fabricating advice; if the weather step (4-7) fails or is unconfigured, the flow continues without weather grounding rather than blocking.</figcaption>
+</figure>
+</section>
+
+<!-- ============ 8. STATE DIAGRAM ============ -->
+<section class="section" id="d8">
+<div class="runhead">FarmConnect Ghana · Design Documentation</div>
+<h1>8. Order Lifecycle — State Diagram</h1>
+<p>The <code class="inline">Order.status</code> state machine, enforced by an exact-status check on every transition (an out-of-turn call returns <code class="inline">409 InvalidOrderState</code>). This is the process/activity view requested by the coursework brief, expressed as a state machine because that is the literal implementation.</p>
+
+<figure class="no-break">
+<svg viewBox="0 0 900 380" role="img" aria-label="State diagram of an order moving from pending through payment submission, confirmation or rejection, optional dispute, to paid and delivered, or to cancelled.">
+<defs><marker id="ar5" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0L10,5L0,10z" fill="#14532d"/></marker></defs>
+<circle cx="30" cy="60" r="8" fill="#14532d"/>
+<rect x="80" y="35" width="130" height="46" rx="20" class="actorbox"/><text x="145" y="63" text-anchor="middle" class="lbl">pending</text>
+<rect x="280" y="35" width="170" height="46" rx="20" class="actorbox"/><text x="365" y="63" text-anchor="middle" class="lbl">payment_submitted</text>
+<rect x="530" y="35" width="130" height="46" rx="20" class="actorbox"/><text x="595" y="63" text-anchor="middle" class="lbl">paid</text>
+<rect x="730" y="35" width="140" height="46" rx="20" class="actorbox"/><text x="800" y="63" text-anchor="middle" class="lbl">delivered</text>
+<rect x="280" y="150" width="170" height="46" rx="20" fill="#fdf1f0" stroke="#b42318"/><text x="365" y="178" text-anchor="middle" class="lbl">payment_rejected</text>
+<rect x="280" y="255" width="130" height="46" rx="20" fill="#fdf1f0" stroke="#b42318"/><text x="345" y="283" text-anchor="middle" class="lbl">disputed</text>
+<rect x="80" y="255" width="150" height="46" rx="20" fill="#fdf1f0" stroke="#b42318"/><text x="155" y="283" text-anchor="middle" class="lbl">cancelled ⛔</text>
+
+<line x1="38" y1="60" x2="78" y2="60" class="msg" marker-end="url(#ar5)"/>
+<line x1="210" y1="58" x2="278" y2="58" class="msg" marker-end="url(#ar5)"/><text x="215" y="50" class="lbl sm">buyer submits payment</text>
+<line x1="450" y1="58" x2="528" y2="58" class="msg" marker-end="url(#ar5)"/><text x="455" y="50" class="lbl sm">farmer confirms</text>
+<line x1="660" y1="58" x2="728" y2="58" class="msg" marker-end="url(#ar5)"/><text x="668" y="50" class="lbl sm">buyer confirms delivery</text>
+<line x1="145" y1="81" x2="145" y2="278" class="msg" marker-end="url(#ar5)"/><text x="150" y="180" class="lbl sm">buyer cancels (pre-payment)</text>
+<line x1="365" y1="81" x2="365" y2="148" class="msg" marker-end="url(#ar5)"/><text x="372" y="118" class="lbl sm">farmer rejects</text>
+<line x1="330" y1="150" x2="330" y2="83" class="msg" marker-end="url(#ar5)"/><text x="230" y="130" class="lbl sm">buyer resubmits</text>
+<line x1="365" y1="196" x2="345" y2="253" class="msg" marker-end="url(#ar5)"/><text x="370" y="228" class="lbl sm">buyer disputes</text>
+<line x1="410" y1="270" x2="595" y2="81" class="msg" marker-end="url(#ar5)"/><text x="470" y="180" class="lbl sm">admin: uphold payment</text>
+<line x1="280" y1="278" x2="230" y2="278" class="msg" marker-end="url(#ar5)"/><text x="235" y="270" class="lbl sm">admin: uphold rejection (listing reopens)</text>
+</svg>
+<figcaption>Figure 8.1 — Order state machine. Red rounded boxes are terminal/negative states (<code class="inline">cancelled</code>) or states requiring human intervention before they can resolve (<code class="inline">payment_rejected</code>, <code class="inline">disputed</code>). Reaching <code class="inline">delivered</code> also flips the parent <code class="inline">Listing.status</code> to <code class="inline">SOLD</code>; reaching <code class="inline">cancelled</code> reopens it to <code class="inline">ACTIVE</code>.</figcaption>
+</figure>
+</section>
+
+<!-- ============ 9. WIREFRAMES ============ -->
+<section class="section" id="d9">
+<div class="runhead">FarmConnect Ghana · Design Documentation</div>
+<h1>9. User Interface Wireframes</h1>
+<p>Low-fidelity wireframes of the actual delivered screens (not the early Figma-Make prototype, which was a copy/flow reference only and was never pixel-matched). Screen names and navigation structure are taken directly from <code class="inline">apps/web/src/routes.tsx</code> and <code class="inline">BottomNav.tsx</code>.</p>
+
+<figure class="no-break">
+<svg viewBox="0 0 1040 430" role="img" aria-label="Six mobile wireframes: onboarding and OTP, farmer home, create listing, buyer marketplace, checkout and payment submission, and advisory chat.">
+<style>.ph{fill:#fafcfa;stroke:#334155;stroke-width:1.6;rx:16}.scr{fill:#fff;stroke:#cfe0d3}.bar{fill:#1B7A3D}.chip{fill:#eef6ee;stroke:#1B7A3D}.ln{stroke:#cfe0d3;stroke-width:6;stroke-linecap:round}.btn{fill:#1B7A3D}</style>
+<!-- frame template repeated 6x, width 150 height 300, gap 10, start x=10 y=20 -->
+
+<!-- 1: Onboarding/OTP -->
+<g transform="translate(10,20)">
+<rect class="ph" width="150" height="300" rx="16"/>
+<rect class="bar" x="8" y="8" width="134" height="26" rx="4"/><text x="75" y="26" text-anchor="middle" class="lbl wt" font-size="8">FarmConnect Ghana</text>
+<text x="75" y="60" text-anchor="middle" class="lbl sm" font-weight="700">Enter your phone</text>
+<rect class="scr" x="15" y="75" width="120" height="24" rx="4"/><text x="75" y="91" text-anchor="middle" class="lbl sm">024 000 0000</text>
+<rect class="btn" x="15" y="108" width="120" height="24" rx="4"/><text x="75" y="124" text-anchor="middle" class="lbl wt" font-size="8">Send code</text>
+<text x="75" y="160" text-anchor="middle" class="lbl sm" font-weight="700">Enter 6-digit code</text>
+<g>
+<rect class="scr" x="18" y="175" width="16" height="20" rx="3"/><rect class="scr" x="38" y="175" width="16" height="20" rx="3"/><rect class="scr" x="58" y="175" width="16" height="20" rx="3"/>
+<rect class="scr" x="78" y="175" width="16" height="20" rx="3"/><rect class="scr" x="98" y="175" width="16" height="20" rx="3"/><rect class="scr" x="118" y="175" width="16" height="20" rx="3"/>
+</g>
+<rect class="btn" x="15" y="205" width="120" height="24" rx="4"/><text x="75" y="221" text-anchor="middle" class="lbl wt" font-size="8">Verify &amp; continue</text>
+<text x="75" y="255" text-anchor="middle" class="lbl sm">EN | TW</text>
+</g>
+<text x="85" y="345" text-anchor="middle" class="lbl sm">Onboarding / OTP</text>
+
+<!-- 2: Farmer Home -->
+<g transform="translate(180,20)">
+<rect class="ph" width="150" height="300" rx="16"/>
+<rect class="bar" x="8" y="8" width="134" height="26" rx="4"/><text x="75" y="26" text-anchor="middle" class="lbl wt" font-size="8">Akwaaba, Ama 🔔</text>
+<rect class="chip" x="15" y="42" width="35" height="30" rx="4"/><rect class="chip" x="57" y="42" width="35" height="30" rx="4"/><rect class="chip" x="99" y="42" width="36" height="30" rx="4"/>
+<text x="32" y="60" text-anchor="middle" class="lbl sm" font-size="7">Listings</text><text x="74" y="60" text-anchor="middle" class="lbl sm" font-size="7">Orders</text><text x="117" y="60" text-anchor="middle" class="lbl sm" font-size="7">GH₵ Earned</text>
+<line class="ln" x1="15" y1="90" x2="80" y2="90"/>
+<rect class="scr" x="15" y="100" width="120" height="46" rx="4"/><line class="ln" x1="22" y1="112" x2="90" y2="112"/><line class="ln" x1="22" y1="124" x2="70" y2="124"/>
+<rect class="scr" x="15" y="152" width="120" height="46" rx="4"/><line class="ln" x1="22" y1="164" x2="90" y2="164"/><line class="ln" x1="22" y1="176" x2="70" y2="176"/>
+<rect class="btn" x="15" y="210" width="120" height="24" rx="4"/><text x="75" y="226" text-anchor="middle" class="lbl wt" font-size="8">+ New listing</text>
+<rect x="8" y="266" width="134" height="26" fill="#eef1f4"/>
+<text x="30" y="283" text-anchor="middle" class="lbl sm" font-size="7">🏠</text><text x="60" y="283" text-anchor="middle" class="lbl sm" font-size="7">🌾</text><text x="90" y="283" text-anchor="middle" class="lbl sm" font-size="7">📦</text><text x="118" y="283" text-anchor="middle" class="lbl sm" font-size="7">📈</text><text x="132" y="283" text-anchor="middle" class="lbl sm" font-size="7">👤</text>
+</g>
+<text x="255" y="345" text-anchor="middle" class="lbl sm">Farmer Home</text>
+
+<!-- 3: Create Listing -->
+<g transform="translate(350,20)">
+<rect class="ph" width="150" height="300" rx="16"/>
+<rect class="bar" x="8" y="8" width="134" height="26" rx="4"/><text x="75" y="26" text-anchor="middle" class="lbl wt" font-size="8">‹ New Listing</text>
+<rect class="scr" x="15" y="42" width="120" height="50" rx="4"/><text x="75" y="70" text-anchor="middle" class="lbl sm" font-size="8">📷 Add photos</text>
+<text x="18" y="104" class="lbl sm" font-size="7">Crop type</text><rect class="scr" x="15" y="108" width="120" height="20" rx="4"/>
+<text x="18" y="136" class="lbl sm" font-size="7">Quantity (kg)</text><rect class="scr" x="15" y="140" width="56" height="20" rx="4"/>
+<text x="79" y="136" class="lbl sm" font-size="7">Price/kg</text><rect class="scr" x="79" y="140" width="56" height="20" rx="4"/>
+<text x="18" y="169" class="lbl sm" font-size="7">Harvest date</text><rect class="scr" x="15" y="173" width="120" height="20" rx="4"/>
+<text x="18" y="202" class="lbl sm" font-size="7">📍 Use current location</text>
+<rect class="scr" x="15" y="206" width="16" height="16" rx="3"/><text x="38" y="230" class="lbl sm" font-size="7">Sell as my co-op</text>
+<rect class="btn" x="15" y="245" width="120" height="26" rx="4"/><text x="75" y="262" text-anchor="middle" class="lbl wt" font-size="8">Publish listing</text>
+</g>
+<text x="425" y="345" text-anchor="middle" class="lbl sm">Create Listing</text>
+
+<!-- 4: Buyer Marketplace -->
+<g transform="translate(520,20)">
+<rect class="ph" width="150" height="300" rx="16"/>
+<rect class="bar" x="8" y="8" width="134" height="26" rx="4"/><text x="75" y="26" text-anchor="middle" class="lbl wt" font-size="8">Marketplace 🔔</text>
+<rect class="scr" x="15" y="42" width="120" height="20" rx="10"/><text x="30" y="56" class="lbl sm" font-size="7">🔍 Search crops...</text>
+<rect class="chip" x="15" y="68" width="30" height="16" rx="8"/><rect class="chip" x="49" y="68" width="38" height="16" rx="8"/><rect class="chip" x="91" y="68" width="44" height="16" rx="8"/>
+<text x="30" y="79" text-anchor="middle" class="lbl sm" font-size="6">All</text><text x="68" y="79" text-anchor="middle" class="lbl sm" font-size="6">Grains</text><text x="113" y="79" text-anchor="middle" class="lbl sm" font-size="6">Vegetables</text>
+<rect class="scr" x="15" y="92" width="120" height="60" rx="4"/><text x="22" y="106" class="lbl sm" font-size="8">🍅 Tomatoes</text><text x="22" y="118" class="lbl sm" font-size="7">Kwame A. · Ashanti ✅4.8</text><text x="22" y="132" class="lbl sm" font-size="7">50kg · GH₵6.50/kg · 3.2km</text>
+<rect class="scr" x="15" y="158" width="120" height="60" rx="4"/><text x="22" y="172" class="lbl sm" font-size="8">🌾 Maize</text><text x="22" y="184" class="lbl sm" font-size="7">Yaa B. · Bono ✅4.6</text><text x="22" y="198" class="lbl sm" font-size="7">120kg · GH₵3.20/kg · 8.1km</text>
+<rect x="8" y="266" width="134" height="26" fill="#eef1f4"/>
+<text x="30" y="283" text-anchor="middle" class="lbl sm" font-size="7">🛒</text><text x="60" y="283" text-anchor="middle" class="lbl sm" font-size="7">📦</text><text x="90" y="283" text-anchor="middle" class="lbl sm" font-size="7">🤖</text><text x="118" y="283" text-anchor="middle" class="lbl sm" font-size="7">📈</text><text x="132" y="283" text-anchor="middle" class="lbl sm" font-size="7">👤</text>
+</g>
+<text x="595" y="345" text-anchor="middle" class="lbl sm">Buyer Marketplace</text>
+
+<!-- 5: Checkout/payment -->
+<g transform="translate(690,20)">
+<rect class="ph" width="150" height="300" rx="16"/>
+<rect class="bar" x="8" y="8" width="134" height="26" rx="4"/><text x="75" y="26" text-anchor="middle" class="lbl wt" font-size="8">‹ Pay Kwame A.</text>
+<rect class="scr" x="15" y="42" width="120" height="56" rx="4"/><text x="22" y="56" class="lbl sm" font-size="7">Send to (MTN MoMo):</text><text x="22" y="70" class="lbl sm" font-weight="700" font-size="8">024 555 1234</text><text x="22" y="84" class="lbl sm" font-size="7">Name: Kwame Asante</text>
+<text x="22" y="112" class="lbl sm" font-size="7">Amount: GH₵340.00</text>
+<line class="ln" x1="15" y1="122" x2="135" y2="122"/>
+<text x="18" y="142" class="lbl sm" font-size="7">Your MoMo number</text><rect class="scr" x="15" y="146" width="120" height="18" rx="4"/>
+<text x="18" y="174" class="lbl sm" font-size="7">Transaction ID</text><rect class="scr" x="15" y="178" width="120" height="18" rx="4"/>
+<rect class="btn" x="15" y="206" width="120" height="24" rx="4"/><text x="75" y="222" text-anchor="middle" class="lbl wt" font-size="8">I've paid — submit</text>
+<text x="75" y="250" text-anchor="middle" class="lbl sm" font-size="7">Status: payment_submitted</text>
+</g>
+<text x="765" y="345" text-anchor="middle" class="lbl sm">Checkout / Submit Payment</text>
+
+<!-- 6: Advisory chat -->
+<g transform="translate(860,20)">
+<rect class="ph" width="150" height="300" rx="16"/>
+<rect class="bar" x="8" y="8" width="134" height="26" rx="4"/><text x="75" y="26" text-anchor="middle" class="lbl wt" font-size="8">🤖 Advisor</text>
+<rect class="scr" x="15" y="42" width="90" height="30" rx="10"/><text x="60" y="60" text-anchor="middle" class="lbl sm" font-size="7">My tomato leaves…</text>
+<rect class="chip" x="45" y="78" width="90" height="46" rx="10"/><text x="90" y="92" text-anchor="middle" class="lbl sm" font-size="7">Sounds like early</text><text x="90" y="104" text-anchor="middle" class="lbl sm" font-size="7">blight. Rain expected</text><text x="90" y="116" text-anchor="middle" class="lbl sm" font-size="7">Thu — spray before then</text>
+<rect class="scr" x="45" y="128" width="60" height="40" rx="4"/><text x="75" y="151" text-anchor="middle" class="lbl sm" font-size="6">[photo]</text>
+<rect class="scr" x="15" y="250" width="90" height="22" rx="10"/><rect class="btn" x="110" y="250" width="24" height="22" rx="6"/><text x="122" y="265" text-anchor="middle" class="lbl wt" font-size="8">➤</text>
+</g>
+<text x="935" y="345" text-anchor="middle" class="lbl sm">Advisory Chat</text>
+</svg>
+<figcaption>Figure 9.1 — Representative screens for both roles. The Admin Portal (<code class="inline">/admin/users</code>, <code class="inline">/admin/listings</code>, <code class="inline">/admin/disputes</code>) intentionally uses a different, desktop-oriented table layout with no bottom navigation — it is an internal staff tool, English-only (SRS §9.7), not the farmer/buyer-facing mobile experience shown here.</figcaption>
+</figure>
+</section>
+
+<!-- ============ 10. TECH ARCHITECTURE ============ -->
+<section class="section" id="d10">
+<div class="runhead">FarmConnect Ghana · Design Documentation</div>
+<h1>10. Technology Architecture</h1>
+<table>
+<thead><tr><th>Layer</th><th>Choice</th><th>Why</th></tr></thead>
+<tbody>
+<tr><td>Frontend</td><td>Vite + React 18 + TypeScript, Tailwind CSS, i18next, vite-plugin-pwa</td><td>Fast dev/build, installable offline-capable PWA with zero native-app-store friction, matches NFR-M2/U1.</td></tr>
+<tr><td>Backend</td><td>Express 4 + TypeScript, Prisma ORM, ioredis</td><td>Simple, well-understood REST stack; Prisma gives type-safe migrations; module-per-domain layout satisfies NFR-M1.</td></tr>
+<tr><td>Data</td><td>PostgreSQL 16, Redis 7 (Docker Compose locally)</td><td>Relational integrity for a transactional marketplace; Redis for anything ephemeral/rate-limited (OTP, refresh allowlist, weather cache).</td></tr>
+<tr><td>Auth</td><td>Phone + OTP, JWT access (12h) + rotating refresh (30d) via Redis allowlist</td><td>No password to manage/leak; refresh rotation gives real revocation (logout) despite JWTs being otherwise stateless.</td></tr>
+<tr><td>AI</td><td>Google Gemini (<code class="inline">gemini-flash-latest</code>)</td><td>Free developer tier with no per-end-user account needed — the only realistic choice for a chatbot shared by many unregistered-with-the-provider users.</td></tr>
+<tr><td>Offline</td><td>Workbox runtime caching (NetworkFirst for API GETs, CacheFirst for photos)</td><td>Meets NFR-R3 — cached last-seen data on a dropped/poor connection, never masking staleness (OfflineBanner).</td></tr>
+<tr><td>Monorepo</td><td>npm workspaces — <code class="inline">apps/web</code>, <code class="inline">apps/api</code>, <code class="inline">packages/shared</code></td><td>One source of truth for enums/validation shared by both apps; independent build/test/deploy per workspace.</td></tr>
+</tbody>
+</table>
+<p>Full hosting/deployment topology, provider choices, and step-by-step deployment instructions are in the <em>Project Documentation</em> §Deployment and the standalone Deployment Guide.</p>
+</section>
+
+<!-- ============ 11. DESIGN RATIONALE ============ -->
+<section class="section" id="d11">
+<div class="runhead">FarmConnect Ghana · Design Documentation</div>
+<h1>11. Design Decisions Where the SRS Was Silent</h1>
+<p>FR-08 (ratings), FR-10 (co-ops), and FR-13 (admin) were each one sentence of intent in the v1.0 SRS, with no data model, workflow, or screen spec — the team had to design these from scratch during implementation. This section records the concrete decisions and the reasoning, for design-review traceability (cross-referenced from SRS §9.3/9.6).</p>
+<h2>11.1 Ratings &amp; trust</h2>
+<p>Design choice: a rating is only possible once an order reaches <code class="inline">delivered</code> (you can't rate a transaction that didn't happen), exactly one rating per (order, rater) pair (enforced by a DB unique constraint, not just application logic), and the rated user's <code class="inline">trustScore</code>/<code class="inline">ratingCount</code> are recomputed inside the same database transaction as the insert — chosen specifically so the two numbers can never drift apart under concurrent writes.</p>
+<h2>11.2 Co-operative groups</h2>
+<p>Design choice: one co-op per farmer at a time (a simplifying constraint the SRS never ruled out), a short human-shareable join code instead of an approval workflow (lower friction for a rural, low-literacy user base), and listing-level attribution instead of building a separate bulk-order/negotiation subsystem the SRS never specified in enough detail to design safely. Leadership succession (earliest-joined member promoted, or dissolution if the leader was the sole member) was chosen as the simplest rule that avoids a leaderless or orphaned co-op.</p>
+<h2>11.3 Administration &amp; moderation</h2>
+<p>Design choice: no self-service admin signup at all — the public role-selection endpoint only ever issues FARMER/BUYER, and an admin account is created by whoever controls the deployment via a one-line seed command, then logs in through the ordinary phone+OTP flow. This was chosen over a separate admin login screen/credential because it reuses a flow that is already tested and audited, and because the number of admins in a system like this is small and known in advance, not something that benefits from self-service.</p>
+</section>
+
+</body>
+</html>

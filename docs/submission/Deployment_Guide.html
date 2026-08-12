@@ -1,0 +1,137 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FarmConnect Ghana — Deployment Guide</title>
+<link rel="stylesheet" href="assets/report.css">
+<style>
+.step { display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
+.step .n { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: #1B7A3D; color: #fff; font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: center; }
+.step .t { padding-top: 1px; }
+.stack-diagram { display: flex; justify-content: space-between; gap: 8px; margin: 14px 0; flex-wrap: wrap; }
+.stack-diagram .box { flex: 1; min-width: 110px; border: 1.5px solid #1B7A3D; background: #eef6ee; border-radius: 8px; padding: 8px; text-align: center; font-size: 9.3pt; }
+.stack-diagram .box b { display: block; color: #14532d; font-size: 9.8pt; }
+.free { display:inline-block; background:#e6f4ea; color:#14532d; font-size: 8.2pt; font-weight:700; padding:1px 6px; border-radius:100px; margin-left:4px; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div>
+    <div class="brandmark"><span class="dot">FC</span><span class="name">FarmConnect Ghana</span></div>
+    <div class="kicker">Deployment Guide</div>
+    <h1 class="doctitle">Deployment<br>Guide</h1>
+    <div class="docsubtitle">Getting FarmConnect Ghana Live on a $0/month Stack</div>
+    <p class="lede">A numbered, copy-paste runbook for deploying the web PWA, API, database, and cache to permanently-free tiers. Account creation and dashboard clicks in this guide must be performed by a human (they involve email verification/OAuth) — everything else is a command you can run as-is.</p>
+  </div>
+  <table class="meta-table">
+    <tr><td class="k">Course</td><td class="v">CSCD602 — Advanced Software Engineering, Capstone Project</td></tr>
+    <tr><td class="k">Group</td><td class="v">Angry Nerds</td></tr>
+    <tr><td class="k">Project title</td><td class="v">FarmConnect Ghana</td></tr>
+    <tr><td class="k">Document version</td><td class="v">1.0</td></tr>
+    <tr><td class="k">Date</td><td class="v">12 August 2026</td></tr>
+    <tr><td class="k">Individual submission by</td><td class="v">George Boadu Junior — 22427354</td></tr>
+  </table>
+  <div class="footer-block">Supporting material for the Project Documentation §Deployment. See render.yaml and vercel.json at the repo root — this guide explains how to use them.</div>
+</section>
+
+<section class="section">
+<div class="runhead">FarmConnect Ghana · Deployment Guide</div>
+<h1>Target architecture — all free tiers</h1>
+<div class="stack-diagram">
+<div class="box"><b>Vercel</b>Web PWA (static)<span class="free">free forever</span></div>
+<div class="box"><b>Render</b>API — Node/Express<span class="free">free web service</span></div>
+<div class="box"><b>Supabase</b>PostgreSQL 16<span class="free">free forever, 500MB</span></div>
+<div class="box"><b>Upstash</b>Redis<span class="free">free forever, 10k cmd/day</span></div>
+<div class="box"><b>Google AI Studio</b>Gemini API key<span class="free">free tier</span></div>
+</div>
+<p>This combination was chosen specifically because each provider's free tier is <em>ongoing</em>, not a time-limited trial — no card required for any of them at this tier, no surprise expiry. The one trade-off: Render's free web service sleeps after ~15 minutes idle and takes ~30–50s to wake on the next request — acceptable for grading/demo use, called out explicitly in the README/User Manual as a known limitation.</p>
+<div class="callout note"><span class="label">Everything below is scripted where a script can do it</span>You (a human) only need to: (1) sign up for four free accounts, (2) click "New Project/Service" a few times, (3) paste connection strings between dashboards. Every build/deploy step after that is automatic (Vercel/Render both redeploy on every push to <code class="inline">main</code>).</div>
+</section>
+
+<section class="section">
+<div class="runhead">FarmConnect Ghana · Deployment Guide</div>
+<h1>Step 1 — Push the repo to GitHub</h1>
+<div class="step"><div class="n">1</div><div class="t">If not already done: create a GitHub repository and push this project to it. Both Vercel and Render deploy directly from a GitHub repo.</div></div>
+<pre class="mono">git remote -v   # confirm origin points at your GitHub repo
+git push origin main</pre>
+</section>
+
+<section class="section">
+<div class="runhead">FarmConnect Ghana · Deployment Guide</div>
+<h1>Step 2 — Database: Supabase (free Postgres)</h1>
+<div class="step"><div class="n">1</div><div class="t">Sign up at <a href="https://supabase.com">supabase.com</a> → <strong>New Project</strong>. Pick any region (closest to your users), set a strong database password, and wait ~2 minutes for provisioning.</div></div>
+<div class="step"><div class="n">2</div><div class="t">Project → <strong>Settings → Database → Connection string</strong>. Copy the <strong>"Connection pooling" (Transaction mode, port 6543)</strong> URI — this is the one Prisma should use in a serverless-adjacent host like Render's free tier.</div></div>
+<div class="step"><div class="n">3</div><div class="t">It looks like: <code class="inline">postgresql://postgres.xxxx:[PASSWORD]@aws-0-region.pooler.supabase.com:6543/postgres</code>. Append <code class="inline">?pgbouncer=true</code> to the end — Prisma needs this flag when talking to Supabase's pooled connection. This full string is your <code class="inline">DATABASE_URL</code>.</div></div>
+</section>
+
+<section class="section">
+<div class="runhead">FarmConnect Ghana · Deployment Guide</div>
+<h1>Step 3 — Cache: Upstash (free Redis)</h1>
+<div class="step"><div class="n">1</div><div class="t">Sign up at <a href="https://upstash.com">upstash.com</a> → <strong>Create Database</strong> → Redis → pick a region close to your Render region.</div></div>
+<div class="step"><div class="n">2</div><div class="t">On the database's page, copy the <strong>"Redis URL"</strong> (starts <code class="inline">rediss://</code> — note the double-s, meaning TLS). This is your <code class="inline">REDIS_URL</code>. <code class="inline">ioredis</code> (already used by the API) supports <code class="inline">rediss://</code> natively — no code change needed.</div></div>
+</section>
+
+<section class="section">
+<div class="runhead">FarmConnect Ghana · Deployment Guide</div>
+<h1>Step 4 — AI &amp; weather keys</h1>
+<div class="step"><div class="n">1</div><div class="t"><strong>Gemini:</strong> <a href="https://aistudio.google.com/apikey">aistudio.google.com/apikey</a> → sign in with any Google account → Create API key. No credit card. This is <code class="inline">GEMINI_API_KEY</code>.</div></div>
+<div class="step"><div class="n">2</div><div class="t"><strong>OpenWeatherMap:</strong> <a href="https://home.openweathermap.org/users/sign_up">home.openweathermap.org</a> → sign up → API keys tab → default key. This is <code class="inline">WEATHER_API_KEY</code>. (Optional — the advisor works without it, just without weather grounding.)</div></div>
+<div class="step"><div class="n">3</div><div class="t"><strong>GiantSMS</strong> (optional — without it, OTP/SMS just logs to the Render console instead of sending): register at <a href="https://giantsms.com">giantsms.com</a>, get your API token and a registered sender ID. These are <code class="inline">GIANTSMS_API_TOKEN</code> / <code class="inline">GIANTSMS_SENDER_ID</code>.</div></div>
+</section>
+
+<section class="section">
+<div class="runhead">FarmConnect Ghana · Deployment Guide</div>
+<h1>Step 5 — API: Render</h1>
+<div class="step"><div class="n">1</div><div class="t">Sign up at <a href="https://render.com">render.com</a> (GitHub sign-in is fastest) → <strong>New → Blueprint</strong> → connect your GitHub account → select this repository. Render detects <code class="inline">render.yaml</code> at the repo root automatically and proposes the <code class="inline">farmconnect-api</code> service.</div></div>
+<div class="step"><div class="n">2</div><div class="t">Before clicking "Apply," Render will prompt for every env var marked <code class="inline">sync: false</code> in <code class="inline">render.yaml</code>. Fill in: <code class="inline">DATABASE_URL</code> (Step 2), <code class="inline">REDIS_URL</code> (Step 3), <code class="inline">GEMINI_API_KEY</code>/<code class="inline">WEATHER_API_KEY</code>/<code class="inline">GIANTSMS_*</code> (Step 4). Leave <code class="inline">CORS_ORIGIN</code> blank for now — you'll set it in Step 7 once you know your Vercel URL. <code class="inline">JWT_SECRET</code>/<code class="inline">JWT_REFRESH_SECRET</code> are auto-generated by Render — you never need to see or set these.</div></div>
+<div class="step"><div class="n">3</div><div class="t">Click <strong>Apply</strong>. Render installs, builds, runs <code class="inline">prisma migrate deploy</code> against your Supabase database (creating all 10 tables), and starts the server. Watch the build log for <code class="inline">Already in sync</code> or a list of applied migrations — both are success.</div></div>
+<div class="step"><div class="n">4</div><div class="t">Copy your service's URL, shown at the top of its Render dashboard page — e.g. <code class="inline">https://farmconnect-api.onrender.com</code>. This is your <strong>API base URL</strong>.</div></div>
+<div class="step"><div class="n">5</div><div class="t">Verify: open <code class="inline">&lt;your-api-url&gt;/health</code> in a browser. Expect <code class="inline">{"status":"ok","db":true,"redis":true}</code> — exactly the response captured in the Testing Report §4.</div></div>
+</section>
+
+<section class="section">
+<div class="runhead">FarmConnect Ghana · Deployment Guide</div>
+<h1>Step 6 — Web: Vercel</h1>
+<div class="step"><div class="n">1</div><div class="t">Sign up at <a href="https://vercel.com">vercel.com</a> (GitHub sign-in) → <strong>Add New → Project</strong> → import this repository. Vercel reads <code class="inline">vercel.json</code> at the repo root automatically.</div></div>
+<div class="step"><div class="n">2</div><div class="t">Under <strong>Environment Variables</strong>, add <code class="inline">VITE_API_URL</code> = your Render API URL from Step 5.4 (no trailing slash).</div></div>
+<div class="step"><div class="n">3</div><div class="t">Click <strong>Deploy</strong>. Vercel runs the build command from <code class="inline">vercel.json</code> and serves <code class="inline">apps/web/dist</code>.</div></div>
+<div class="step"><div class="n">4</div><div class="t">Copy your deployment URL — e.g. <code class="inline">https://farmconnect-ghana.vercel.app</code>. This is your <strong>live application URL</strong>.</div></div>
+</section>
+
+<section class="section">
+<div class="runhead">FarmConnect Ghana · Deployment Guide</div>
+<h1>Step 7 — Close the loop: CORS</h1>
+<div class="step"><div class="n">1</div><div class="t">Back in Render → your API service → <strong>Environment</strong> → set <code class="inline">CORS_ORIGIN</code> to your Vercel URL from Step 6.4 (exact origin, no trailing slash — e.g. <code class="inline">https://farmconnect-ghana.vercel.app</code>).</div></div>
+<div class="step"><div class="n">2</div><div class="t">Save — Render redeploys automatically. Without this step, the browser will block every API call from the deployed web app with a CORS error.</div></div>
+</section>
+
+<section class="section">
+<div class="runhead">FarmConnect Ghana · Deployment Guide</div>
+<h1>Step 8 — Seed an administrator account</h1>
+<p>There is no self-service admin sign-up (SRS §9.3) — run this once, from your own machine, pointed at the production database:</p>
+<pre class="mono">cd farmconnect-ghana
+DATABASE_URL="&lt;your Supabase connection string&gt;" \
+  npx tsx apps/api/prisma/seed.ts --phone 0241234567 --name "Admin Name"</pre>
+<p>That phone number can then log in through the normal phone+OTP screen on the live site and will land in the Admin Portal (<code class="inline">/admin/users</code>).</p>
+</section>
+
+<section class="section">
+<div class="runhead">FarmConnect Ghana · Deployment Guide</div>
+<h1>Step 9 — Final verification checklist</h1>
+<table>
+<thead><tr><th style="width:8%">✓</th><th>Check</th></tr></thead>
+<tbody>
+<tr><td>☐</td><td>Live URL loads the Onboarding screen over HTTPS.</td></tr>
+<tr><td>☐</td><td>Phone+OTP login completes and a Farmer/Buyer account can be created.</td></tr>
+<tr><td>☐</td><td>A farmer can link Mobile Money and publish a listing.</td></tr>
+<tr><td>☐</td><td>A buyer can find that listing, place an order, and reach the payment screen.</td></tr>
+<tr><td>☐</td><td>The seeded admin phone number can log in and see the Admin Portal.</td></tr>
+<tr><td>☐</td><td><code class="inline">&lt;api-url&gt;/health</code> returns <code class="inline">db:true, redis:true</code>.</td></tr>
+</tbody>
+</table>
+<div class="callout risk"><span class="label">Keep it accessible</span>The coursework requires the live application to remain accessible through grading. Render's free tier and Vercel's free tier do not expire on a timer the way some "trial credit" platforms do — but if either project is deleted, paused, or a billing/verification issue arises on either dashboard, the live URL will go down. Check both dashboards a day before your submission deadline.</div>
+</section>
+
+</body>
+</html>

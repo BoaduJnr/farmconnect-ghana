@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FarmConnect Ghana — README (Examiner Quick Guide)</title>
+<link rel="stylesheet" href="assets/report.css">
+</head>
+<body>
+
+<section class="cover">
+  <div>
+    <div class="brandmark"><span class="dot">FC</span><span class="name">FarmConnect Ghana</span></div>
+    <div class="kicker">README — Examiner Quick Guide</div>
+    <h1 class="doctitle">README</h1>
+    <div class="docsubtitle">Everything an Examiner Needs to Access and Test the System, on One Page</div>
+    <p class="lede">Fill in the bracketed placeholders in §3 with your actual live values before submitting — see Deployment_Guide.pdf for how to get them. Everything else on this page is already accurate.</p>
+  </div>
+  <table class="meta-table">
+    <tr><td class="k">Course</td><td class="v">CSCD602 — Advanced Software Engineering, Capstone Project</td></tr>
+    <tr><td class="k">Group</td><td class="v">Angry Nerds</td></tr>
+    <tr><td class="k">Project title</td><td class="v">FarmConnect Ghana</td></tr>
+    <tr><td class="k">Document version</td><td class="v">1.0</td></tr>
+    <tr><td class="k">Date</td><td class="v">12 August 2026</td></tr>
+    <tr><td class="k">Individual submission by</td><td class="v">George Boadu Junior — 22427354</td></tr>
+  </table>
+  <div class="footer-block">See Links.txt in this same folder for the plain-text version of §3, as required by the submission structure.</div>
+</section>
+
+<section class="section">
+<div class="runhead">FarmConnect Ghana · README</div>
+<h1>1. Project Overview</h1>
+<p>FarmConnect Ghana is a mobile-first, bilingual (English/Twi) marketplace connecting Ghanaian smallholder farmers directly to buyers, live market prices, and an AI-powered agricultural advisor — with a full SMS command channel so feature-phone users with no data plan can participate too. Built as the CSCD602 Advanced Software Engineering capstone by Group Angry Nerds, University of Ghana.</p>
+
+<h1>2. Main System Features</h1>
+<ul>
+<li>Phone + OTP authentication (no passwords), role-based (Farmer / Buyer / Administrator).</li>
+<li>Produce listings with photos, quantity, price, harvest date, and GPS location; buyer search/filter by crop, category, price, and distance.</li>
+<li>End-to-end order lifecycle with manual, zero-custody Mobile Money payment reconciliation and an administrator-arbitrated dispute path.</li>
+<li>Live, continuously-updating per-crop price feed.</li>
+<li>AI advisory chatbot (Google Gemini) with text + photo-based pest identification, weather-aware.</li>
+<li>In-app + SMS notifications for every order/admin event.</li>
+<li>Farmer cooperative (co-op) groups with join codes and leadership succession.</li>
+<li>Mutual 1–5 star ratings feeding a per-user trust score.</li>
+<li>Full SMS command channel (<code class="inline">HELP</code>, <code class="inline">REG</code>, <code class="inline">MOMO</code>, <code class="inline">LIST</code>, <code class="inline">PRICE</code>, <code class="inline">ORDERS</code>, <code class="inline">CONFIRM</code>) for feature-phone users.</li>
+<li>Admin Portal — account verification/suspension, listing moderation, dispute resolution.</li>
+<li>Installable, offline-capable Progressive Web App with a full bilingual and accessibility pass.</li>
+</ul>
+
+<h1>3. Technology Stack</h1>
+<table class="plain">
+<tbody>
+<tr><td style="width:150px"><strong>Frontend</strong></td><td>Vite + React 18 + TypeScript, Tailwind CSS, i18next, vite-plugin-pwa</td></tr>
+<tr><td><strong>Backend</strong></td><td>Node.js + Express 4 + TypeScript, Prisma ORM, ioredis, Zod</td></tr>
+<tr><td><strong>Data</strong></td><td>PostgreSQL 16, Redis 7</td></tr>
+<tr><td><strong>AI / external</strong></td><td>Google Gemini, OpenWeatherMap, GiantSMS, Africa's Talking</td></tr>
+<tr><td><strong>Hosting</strong></td><td>Vercel (web) · Render (API) · Supabase (Postgres) · Upstash (Redis) — all free tier</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="section">
+<div class="runhead">FarmConnect Ghana · README</div>
+<h1>4. How to Access the Application</h1>
+<table class="plain">
+<tbody>
+<tr><td style="width:180px"><strong>Live application</strong></td><td>[ FILL IN — your Vercel URL, e.g. https://farmconnect-ghana.vercel.app ]</td></tr>
+<tr><td><strong>Admin URL</strong></td><td>[ same URL ]/admin/users (log in with the seeded admin phone number first)</td></tr>
+<tr><td><strong>API base URL</strong></td><td>[ FILL IN — your Render URL, e.g. https://farmconnect-api.onrender.com ] — <code class="inline">/health</code> should return <code class="inline">{"status":"ok","db":true,"redis":true}</code></td></tr>
+<tr><td><strong>Source code</strong></td><td>[ FILL IN — your GitHub repository URL ]</td></tr>
+</tbody>
+</table>
+
+<h1>5. Test Credentials</h1>
+<p>There are no fixed passwords anywhere in this system — authentication is phone number + a one-time SMS code. To test as a Farmer or Buyer:</p>
+<ol>
+<li>Open the live application URL.</li>
+<li>Enter any Ghanaian-format phone number (e.g. <code class="inline">024xxxxxxx</code>) not already registered.</li>
+<li>Retrieve the OTP from the SMS sent to that number — <strong>or</strong>, if GiantSMS credentials are not configured on the deployment, the OTP is logged in the Render service's log output instead of being sent (see Deployment_Guide.pdf Step 4 to configure real SMS sending).</li>
+<li>Choose Farmer or Buyer on first login.</li>
+</ol>
+
+<h1>6. Admin Access</h1>
+<p>There is no self-service admin sign-up. An administrator account must be seeded once against the production database:</p>
+<pre class="mono">DATABASE_URL="&lt;production connection string&gt;" \
+  npx tsx apps/api/prisma/seed.ts --phone [FILL IN ADMIN PHONE] --name "[FILL IN ADMIN NAME]"</pre>
+<p>That phone number then logs in through the same phone+OTP screen as everyone else and lands in the Admin Portal.</p>
+
+<h1>7. Deployment Information</h1>
+<p>Deployed on an entirely free-tier stack: Vercel (static PWA), Render (API, free web service — sleeps after ~15 min idle, ~30–50s cold start on first request after), Supabase (managed Postgres 16), Upstash (managed Redis). Both Vercel and Render redeploy automatically on every push to <code class="inline">main</code>. Full step-by-step deployment instructions are in Deployment_Guide.pdf.</p>
+
+<h1>8. Known Limitations</h1>
+<ul>
+<li>Payments are manually reconciled, not automated escrow (see SRS §9.1).</li>
+<li>Market prices are a realistic simulation, not a real Ghana Commodity Exchange feed (see SRS §9.2).</li>
+<li>10,000-concurrent-user and 99.5%-uptime targets are architecturally plausible but not load-tested at this submission's scale (see Testing_Report.pdf §11).</li>
+<li>Render's free tier cold-starts after idling — the first request after a quiet period may take 30–50 seconds.</li>
+</ul>
+
+<h1>9. Special Instructions for Testing</h1>
+<ul>
+<li>To test the AI advisor, a <code class="inline">GEMINI_API_KEY</code> must be configured on the Render service (Deployment_Guide.pdf Step 4) — without it, the advisor deliberately fails with a clear 503 rather than fabricating a response.</li>
+<li>To test the full farmer flow, Mobile Money details must be linked first (Profile → Mobile Money) — listing creation is blocked until this is done, by design.</li>
+<li>The full end-to-end test evidence already captured for this build (69 automated tests + 11 manual smoke tests, all passing) is in Testing_Report.pdf — useful context if any behaviour looks unexpected during live testing.</li>
+</ul>
+</section>
+
+</body>
+</html>

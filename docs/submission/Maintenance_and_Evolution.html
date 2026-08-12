@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FarmConnect Ghana — Maintenance &amp; Future Evolution Plan</title>
+<link rel="stylesheet" href="assets/report.css">
+<style>
+.roadmap { position: relative; margin: 20px 0 10px 0; }
+.rm-row { display: flex; gap: 14px; margin-bottom: 14px; page-break-inside: avoid; }
+.rm-badge { flex-shrink: 0; width: 90px; text-align: center; background: #1B7A3D; color: #fff; border-radius: 8px; padding: 8px 4px; font-weight: 700; font-size: 10.5pt; }
+.rm-body { flex: 1; border-left: 3px solid #1B7A3D; padding-left: 14px; }
+.rm-body h4 { margin: 0 0 4px; text-transform: none; font-size: 11.5pt; color: #14532d; letter-spacing: 0; }
+.step { display: flex; gap: 12px; margin-bottom: 10px; align-items: flex-start; }
+.step .n { flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%; background: #1B7A3D; color: #fff; font-weight: 700; font-size: 11px; display: flex; align-items: center; justify-content: center; }
+.step .t { padding-top: 1px; }
+</style>
+</head>
+<body>
+
+<section class="cover">
+  <div>
+    <div class="brandmark"><span class="dot">FC</span><span class="name">FarmConnect Ghana</span></div>
+    <div class="kicker">Maintenance &amp; Future Evolution Plan</div>
+    <h1 class="doctitle">Maintenance &amp;<br>Future Evolution</h1>
+    <div class="docsubtitle">Keeping FarmConnect Ghana Correct, Current, and Growing After Delivery</div>
+    <p class="lede">Covers all four ISO/IEC 14764 maintenance categories, the concrete bug-fixing and dependency-update process this repository already supports, and a staged roadmap — from a near-term hardening pass through to AI-driven and integration-led future phases.</p>
+  </div>
+  <table class="meta-table">
+    <tr><td class="k">Course</td><td class="v">CSCD602 — Advanced Software Engineering, Capstone Project</td></tr>
+    <tr><td class="k">Group</td><td class="v">Angry Nerds</td></tr>
+    <tr><td class="k">Project title</td><td class="v">FarmConnect Ghana</td></tr>
+    <tr><td class="k">Document version</td><td class="v">1.0</td></tr>
+    <tr><td class="k">Date</td><td class="v">12 August 2026</td></tr>
+    <tr><td class="k">Individual submission by</td><td class="v">George Boadu Junior — 22427354</td></tr>
+  </table>
+  <div class="footer-block">Companion document to the SRS, Design Documentation, Testing Report, and User Manual.</div>
+</section>
+
+<section class="section">
+<h1>Table of Contents</h1>
+<ul class="toc">
+<li><span class="num">1</span><a href="#m1">Maintenance Categories</a></li>
+<li><span class="num">2</span><a href="#m2">Bug-Fixing Process</a></li>
+<li><span class="num">3</span><a href="#m3">Version Control &amp; Release Strategy</a></li>
+<li><span class="num">4</span><a href="#m4">Dependency &amp; Library Updates</a></li>
+<li><span class="num">5</span><a href="#m5">Security Update Process</a></li>
+<li><span class="num">6</span><a href="#m6">Scalability Plan</a></li>
+<li><span class="num">7</span><a href="#m7">Future Evolution Roadmap</a></li>
+<li><span class="num">8</span><a href="#m8">Technology Migration Candidates</a></li>
+<li><span class="num">9</span><a href="#m9">Future Integrations</a></li>
+<li><span class="num">10</span><a href="#m10">AI &amp; Emerging-Technology Enhancements</a></li>
+</ul>
+</section>
+
+<section class="section" id="m1">
+<div class="runhead">FarmConnect Ghana · Maintenance &amp; Future Evolution Plan</div>
+<h1>1. Maintenance Categories</h1>
+<p>Mapped against the concrete, already-documented gaps and deviations in the SRS (§9) and Testing Report (Defect Log, §11), rather than generic examples:</p>
+
+<table>
+<thead><tr><th style="width:16%">Category</th><th style="width:24%">Definition</th><th>Concrete example in this codebase</th></tr></thead>
+<tbody>
+<tr><td><strong>Corrective</strong></td><td>Fixing defects discovered after delivery.</td><td>Defect D-03 (Testing Report) — the ~800KB single JS chunk — is exactly this kind of post-delivery fix: known, scoped, not yet applied. The stale <code class="inline">eslint-disable</code> directives (D-01/found-and-fixed) are a corrective fix already completed in this submission cycle.</td></tr>
+<tr><td><strong>Adaptive</strong></td><td>Changing the system because its external environment changed.</td><td>Google has already retired dated Gemini model aliases (e.g. <code class="inline">gemini-2.5-flash</code>) for new API keys — <code class="inline">gemini.service.ts</code> deliberately uses the forward-compatible <code class="inline">gemini-flash-latest</code> alias specifically to absorb this kind of change without a code deploy. The next adaptive maintenance event is expected when Google eventually retires <em>that</em> alias in turn.</td></tr>
+<tr><td><strong>Perfective</strong></td><td>Improving performance, maintainability, or usability without changing behaviour.</td><td>D-03's recommended fix (route-based code-splitting) is perfective — it changes nothing about what the app does, only how efficiently it loads. Widening automated frontend test coverage (Testing Report §11) is likewise perfective — it doesn't change behaviour, it changes confidence in behaviour.</td></tr>
+<tr><td><strong>Preventive</strong></td><td>Changing the system before a problem manifests, to reduce future maintenance cost.</td><td>The Prisma migration history (7 migrations, one per phase) is itself a preventive practice — every schema change is reproducible and reversible instead of hand-edited on a live database. Adding automated dependency-vulnerability scanning (§5) before any CVE is actually exploited is the preventive posture this plan recommends next.</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="section" id="m2">
+<div class="runhead">FarmConnect Ghana · Maintenance &amp; Future Evolution Plan</div>
+<h1>2. Bug-Fixing Process</h1>
+<div class="step"><div class="n">1</div><div class="t">Reproduce the bug locally against the same stack as production — Postgres 16 + Redis 7 via <code class="inline">docker-compose</code>, not an in-memory substitute, since several real defects in a system like this only appear against real Postgres/Redis behaviour (TTL expiry, transaction semantics, unique constraints).</div></div>
+<div class="step"><div class="n">2</div><div class="t">Write a failing automated test first wherever the module already has test coverage (14 of the API's modules do) — this is what turns "we think we fixed it" into "we can prove we fixed it and it can't silently come back."</div></div>
+<div class="step"><div class="n">3</div><div class="t">Fix the defect in the smallest diff that addresses the root cause — see the D-01 fix in the Testing Report (one line in <code class="inline">eslint.config.js</code>) as the model: find the actual root cause, not just the symptom, before touching code.</div></div>
+<div class="step"><div class="n">4</div><div class="t">Re-run the full suite (<code class="inline">npm test</code> from the repo root) — a fix that breaks a different module is not a fix.</div></div>
+<div class="step"><div class="n">5</div><div class="t">Record the defect (what, where found, severity, fix, verification) in a running defect log — the Testing Report's Defect Log table is the template to keep appending to, not a one-time report.</div></div>
+<div class="step"><div class="n">6</div><div class="t">Deploy via the same path as every other change (§3) — no hand-editing files directly on a running server.</div></div>
+
+<h2>2.1 Severity &amp; response targets</h2>
+<table>
+<thead><tr><th style="width:14%">Severity</th><th style="width:34%">Definition</th><th>Target response</th></tr></thead>
+<tbody>
+<tr><td>Critical</td><td>Data loss, security exposure, or the payment-reconciliation/dispute flow itself is broken.</td><td>Immediate hotfix, out of normal release cadence.</td></tr>
+<tr><td>High</td><td>A core use case (UC-01–UC-07) is broken for a whole role.</td><td>Next scheduled release, expedited if no workaround exists.</td></tr>
+<tr><td>Medium</td><td>A secondary feature (co-ops, ratings, SMS fallback) misbehaves without blocking the core flow.</td><td>Next scheduled release.</td></tr>
+<tr><td>Low</td><td>Cosmetic, or a tooling/build-quality issue like D-01/D-03.</td><td>Batched with other low-severity fixes.</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="section" id="m3">
+<div class="runhead">FarmConnect Ghana · Maintenance &amp; Future Evolution Plan</div>
+<h1>3. Version Control &amp; Release Strategy</h1>
+<ul>
+<li><strong>Repository:</strong> Git, hosted on GitHub (<code class="inline">github.com/BoaduJnr/farmconnect-ghana</code>) — see Links.txt/README for the live link.</li>
+<li><strong>Branching:</strong> <code class="inline">main</code> is always deployable; feature/fix work happens on short-lived branches merged via pull request, so every change has a reviewable diff and a point to revert to.</li>
+<li><strong>Migrations, not manual schema edits:</strong> every schema change is a new Prisma migration file under <code class="inline">apps/api/prisma/migrations/</code>, applied with <code class="inline">npx prisma migrate deploy</code> — never a hand-run <code class="inline">ALTER TABLE</code> against production.</li>
+<li><strong>Environment parity:</strong> the same <code class="inline">.env.example</code> keys are required in every environment (local, staging, production) — see the Deployment Guide for the authoritative list, so "works on my machine" configuration drift is structurally harder.</li>
+<li><strong>Rollback:</strong> because releases are just new commits deployed the same way as every previous one, rolling back is redeploying the previous commit — no separate rollback tooling to maintain.</li>
+</ul>
+</section>
+
+<section class="section" id="m4">
+<div class="runhead">FarmConnect Ghana · Maintenance &amp; Future Evolution Plan</div>
+<h1>4. Dependency &amp; Library Updates</h1>
+<table>
+<thead><tr><th style="width:20%">What</th><th>Policy</th></tr></thead>
+<tbody>
+<tr><td>Patch/minor updates</td><td>Run <code class="inline">npm outdated</code> monthly across all three workspaces; apply patch/minor bumps in a batch, then re-run the full test suite (§Testing Report) before merging — low risk, high value, no reason to let these accumulate.</td></tr>
+<tr><td>Major version bumps</td><td>One at a time, on its own branch, with the changelog read first — e.g. a future Express 5 or React 19 migration gets its own PR, not bundled with feature work.</td></tr>
+<tr><td>Security advisories</td><td><code class="inline">npm audit</code> (or GitHub's Dependabot alerts, once the repo is connected) reviewed on every dependency change; a flagged <em>direct</em> dependency is patched immediately regardless of the monthly cadence above.</td></tr>
+<tr><td>Pinned/exact versions</td><td><code class="inline">package-lock.json</code> is committed and is the source of truth for exactly what's installed — CI and every developer machine resolve to the same dependency tree.</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="section" id="m5">
+<div class="runhead">FarmConnect Ghana · Maintenance &amp; Future Evolution Plan</div>
+<h1>5. Security Update Process</h1>
+<ul>
+<li><strong>Secrets rotation</strong> — <code class="inline">JWT_SECRET</code>/<code class="inline">JWT_REFRESH_SECRET</code> (≥32 chars, enforced by the zod-validated <code class="inline">env</code> loader) should be rotated on any suspected leak; rotating invalidates every existing refresh token at once (a deliberate, acceptable blast radius versus leaving a leaked secret live).</li>
+<li><strong>Dependency CVEs</strong> — see §4; direct-dependency advisories are treated as security work, not routine maintenance.</li>
+<li><strong>Access-token exposure</strong> — access/refresh tokens are currently stored in <code class="inline">localStorage</code> (SRS §9, Design Documentation "cross-cutting concerns"), a known XSS-exposure trade-off versus httpOnly cookies. <strong>Recommended next security-hardening step:</strong> migrate refresh-token storage to an httpOnly, <code class="inline">SameSite=Strict</code> cookie, keeping only the short-lived access token in memory.</li>
+<li><strong>Rate limiting</strong> — OTP requests are already capped (20/hour/phone via Redis). <strong>Recommended addition:</strong> a coarser IP-based rate limit in front of the whole API once real traffic patterns are known, to blunt credential-stuffing-style abuse against the OTP endpoint itself.</li>
+<li><strong>Suspended-user tokens</strong> — a suspended account's already-issued access token remains valid until its natural 12-hour expiry (a documented trade-off, SRS §9.3). If this is ever unacceptable for a real deployment, the fix is a short-TTL Redis-backed revocation check added to <code class="inline">requireAuth</code> — sized deliberately small so it can be added without redesigning auth.</li>
+</ul>
+</section>
+
+<section class="section" id="m6">
+<div class="runhead">FarmConnect Ghana · Maintenance &amp; Future Evolution Plan</div>
+<h1>6. Scalability Plan</h1>
+<table>
+<thead><tr><th style="width:22%">Bottleneck (if traffic grows)</th><th>Planned response</th></tr></thead>
+<tbody>
+<tr><td>API compute</td><td>The API is already stateless (session state lives in Redis/JWT, not in-process) — horizontal scaling is "run more instances behind a load balancer," not a redesign.</td></tr>
+<tr><td>Database</td><td>Move from a single Postgres instance to a managed service with read replicas once read traffic (marketplace browsing) dominates; the Prisma layer already isolates the app from this change.</td></tr>
+<tr><td>Listing search</td><td>The current in-application Haversine radius search (Design Documentation §6, "No PostGIS") is the first thing to replace under real load — either enable PostGIS on the existing Postgres or move geo-filtering to a dedicated search index (e.g. OpenSearch/Meilisearch) once listing volume makes an in-memory filter slow.</td></tr>
+<tr><td>Real-time updates</td><td>REST polling (SRS §9.7) is the deliberate v1 choice; a WebSocket or push-notification upgrade is the natural next step once order/price update latency actually matters to users at scale.</td></tr>
+<tr><td>Uploaded photos</td><td>Currently local disk (<code class="inline">apps/api/uploads/</code>) — the <code class="inline">.gitignore</code> already flags this as a "for this phase" choice; migrating to S3-compatible object storage removes the constraint that the API can only run on a single machine with persistent local disk.</td></tr>
+<tr><td>Price-tick /notification fan-out</td><td>Both currently run as an in-process <code class="inline">setInterval</code>/inline call inside the single API instance; once there are multiple API instances, these move to a proper job queue (e.g. BullMQ over the existing Redis) so the tick/fan-out runs exactly once, not once per instance.</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="section" id="m7">
+<div class="runhead">FarmConnect Ghana · Maintenance &amp; Future Evolution Plan</div>
+<h1>7. Future Evolution Roadmap</h1>
+<p>Phases 0–7 (README) delivered the complete v1 system this submission documents. The roadmap below is genuinely <em>next</em> — each phase sized to be independently shippable, in priority order.</p>
+
+<div class="roadmap">
+<div class="rm-row"><div class="rm-badge">Phase 8<br><span style="font-size:8.5pt;font-weight:400">Near-term</span></div><div class="rm-body"><h4>Hardening &amp; observability</h4>Close the two open Testing Report items (D-03 code-splitting; broader frontend component test coverage), add structured error tracking (e.g. Sentry) and a real uptime/health dashboard, and run a first load test to get an actual number against NFR-P2 instead of "not verified."</div></div>
+
+<div class="rm-row"><div class="rm-badge">Phase 9</div><div class="rm-body"><h4>Real-time &amp; push</h4>Replace REST polling with WebSocket or Web Push for order-status changes and price alerts — the single highest-leverage UX upgrade once the SMS/offline-first constraints (still fully supported) aren't the only channel that matters.</div></div>
+
+<div class="rm-row"><div class="rm-badge">Phase 10</div><div class="rm-body"><h4>Logistics &amp; delivery tracking</h4>The SRS explicitly excluded delivery dispatch management from v1 scope (§1.2). With the order/payment core proven, this is the natural next domain: connecting a listing's delivery fee to an actual rider/logistics partner instead of a flat fee with no tracking.</div></div>
+
+<div class="rm-row"><div class="rm-badge">Phase 11</div><div class="rm-body"><h4>Regulated payments (optional)</h4>If a real pilot outgrows manual Mobile Money reconciliation (SRS §9.1), integrate a licensed MoMo aggregator (e.g. a Paystack/Hubtel-style PSP) behind a feature flag — the <code class="inline">Order</code> model's seller/buyer momo fields and status machine were designed so this slots in without a schema rewrite, only a new payment-confirmation source.</div></div>
+
+<div class="rm-row"><div class="rm-badge">Phase 12</div><div class="rm-body"><h4>Extension Officer role</h4>Activate the already-reserved <code class="inline">EXTENSION</code> role (SRS §9.3) with real read-mostly aggregate views — regional listing/price trends, advisory-usage patterns — for agricultural extension staff and NGO partners named in the SRS's stakeholder list but never built for in v1.</div></div>
+</div>
+</section>
+
+<section class="section" id="m8">
+<div class="runhead">FarmConnect Ghana · Maintenance &amp; Future Evolution Plan</div>
+<h1>8. Technology Migration Candidates</h1>
+<table>
+<thead><tr><th style="width:24%">Candidate migration</th><th>Trigger / rationale</th></tr></thead>
+<tbody>
+<tr><td>Local disk → S3-compatible object storage for uploads</td><td>Required as soon as the API needs to run as more than one instance (§6).</td></tr>
+<tr><td>In-process price tick/notifications → job queue (BullMQ)</td><td>Same trigger — required for correctness under horizontal scaling, not just nice-to-have.</td></tr>
+<tr><td>REST polling → WebSocket/Web Push</td><td>User-experience driven (Phase 9 above), not forced by any current limitation.</td></tr>
+<tr><td>Own simulated <code class="inline">PriceFeed</code> → a real Ghana Commodity Exchange (or equivalent) integration</td><td>Triggered the moment such a public, developer-accessible API actually exists (SRS §9.2) — the service boundary was deliberately kept thin for exactly this swap.</td></tr>
+<tr><td>Express 4 → Express 5 / alternative framework</td><td>Only if/when Express 4 reaches end-of-support — no functional reason to migrate otherwise; treated as a major dependency bump (§4), not an architecture change.</td></tr>
+</tbody>
+</table>
+</section>
+
+<section class="section" id="m9">
+<div class="runhead">FarmConnect Ghana · Maintenance &amp; Future Evolution Plan</div>
+<h1>9. Future Integrations</h1>
+<ul>
+<li><strong>A real Ghana Commodity Exchange (or equivalent) price API</strong> — the top candidate, discussed in §8.</li>
+<li><strong>A licensed Mobile Money aggregator</strong> for optional in-app payment (§7 Phase 11), kept opt-in so the zero-custody manual-reconciliation model remains available for users/regions that prefer it.</li>
+<li><strong>Logistics/delivery partners</strong> (§7 Phase 10) — the <code class="inline">deliveryFee</code> field already exists on every order; integrating a real courier API is additive, not a schema change.</li>
+<li><strong>Agricultural input suppliers</strong> — named in the original SRS's product context (§1.4) as a future adjacency (fertiliser/seed marketplace) but explicitly out of v1 scope; would reuse the existing Listing/Order machinery with a new participant type rather than a parallel system.</li>
+<li><strong>NGO/extension-officer reporting exports</strong> — CSV/API exports of regional trends once the Extension role (Phase 12) is active.</li>
+</ul>
+</section>
+
+<section class="section" id="m10">
+<div class="runhead">FarmConnect Ghana · Maintenance &amp; Future Evolution Plan</div>
+<h1>10. AI &amp; Emerging-Technology Enhancements</h1>
+<p>FarmConnect already ships one production AI feature (the Gemini-powered advisory chatbot with vision-based pest ID). The following are concrete, scoped extensions of that same capability — not speculative additions:</p>
+<ul>
+<li><strong>Proactive advisory push</strong> — instead of only answering when asked, use the existing weather-context pipeline (already fetched per-conversation) to proactively notify farmers ahead of adverse weather for crops they've listed, via the existing notification channel.</li>
+<li><strong>Price-trend summarisation</strong> — a short natural-language summary of what a farmer's crop's price has done over the last week/month, generated from the same <code class="inline">PriceSnapshot</code> history already being recorded, surfaced on the Prices tab.</li>
+<li><strong>Listing-quality assistant</strong> — use Gemini's existing vision capability (already integrated for pest ID) to flag a listing photo that's blurry, poorly lit, or doesn't clearly show the produce, at upload time, before it goes live to buyers.</li>
+<li><strong>Fraud/anomaly signals for admins</strong> — surface unusual patterns (e.g. a new account created and immediately disputing multiple payments) as a ranked queue in the Admin Portal, rather than the current chronological dispute list — a lightweight, explainable heuristic layer before reaching for a full ML model.</li>
+<li><strong>Voice input for search</strong> — the one feature explicitly descoped from v1.0's SRS (§9.5); speech-to-text for the marketplace search bar would directly serve low-literacy users, the same population the SMS channel already targets.</li>
+</ul>
+<div class="callout note"><span class="label">Guiding principle for all of the above</span>Every enhancement in this section extends a capability the system already has in production (Gemini, weather context, price history, the notification pipeline) rather than introducing a brand-new AI dependency — consistent with how the advisory chatbot itself was scoped in the first place (SRS §9.4): pick the integration that's actually achievable and maintainable, not the most impressive-sounding one.</div>
+</section>
+
+</body>
+</html>

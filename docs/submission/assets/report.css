@@ -1,0 +1,144 @@
+/* FarmConnect Ghana — Capstone submission report stylesheet
+   Shared by every document in docs/submission/. Print-target only (A4, headless-Chrome PDF export). */
+
+@page { size: A4; margin: 24mm 18mm 20mm 18mm; }
+
+:root {
+  --brand: #1B7A3D;
+  --brand-dark: #14532d;
+  --brand-light: #eef6ee;
+  --brand-tint: #f4faf5;
+  --ink: #1f2a24;
+  --ink-soft: #4b5a52;
+  --line: #cfe0d3;
+  --line-soft: #e6efe8;
+  --amber: #b45309;
+  --amber-tint: #fef3e2;
+  --red: #b42318;
+  --red-tint: #fdf1f0;
+  --slate: #334155;
+  --slate-tint: #f1f5f4;
+}
+
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+  color: var(--ink);
+  font-size: 11.3pt;
+  line-height: 1.5;
+}
+
+h1, h2, h3, h4 { font-family: 'Segoe UI', Arial, Helvetica, sans-serif; color: var(--brand-dark); line-height: 1.25; }
+h1 { font-size: 20pt; margin: 0 0 10px; border-bottom: 2.5px solid var(--brand); padding-bottom: 6px; }
+h2 { font-size: 15pt; margin: 26px 0 10px; }
+h3 { font-size: 12.5pt; margin: 18px 0 8px; color: var(--slate); }
+h4 { font-size: 10pt; margin: 14px 0 6px; color: var(--slate); text-transform: uppercase; letter-spacing: 0.03em; }
+p { margin: 0 0 10px; }
+a { color: var(--brand-dark); }
+strong { color: var(--ink); }
+small, .small { font-size: 9pt; color: var(--ink-soft); }
+
+.section { page-break-before: always; }
+.section:first-of-type { page-break-before: auto; }
+.no-break { page-break-inside: avoid; }
+ul, ol { margin: 0 0 10px; padding-left: 22px; }
+li { margin-bottom: 4px; }
+
+/* ---------- Cover page ---------- */
+.cover {
+  min-height: 245mm;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  page-break-after: always;
+}
+.cover .kicker {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 10pt;
+  color: var(--brand);
+  font-weight: 600;
+  margin-bottom: 18px;
+}
+.cover .brandmark {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 30px;
+}
+.cover .brandmark .dot {
+  width: 34px; height: 34px; border-radius: 9px;
+  background: var(--brand);
+  display: inline-flex; align-items: center; justify-content: center;
+  color: #fff; font-weight: 800; font-size: 15pt;
+}
+.cover .brandmark .name { font-size: 13pt; font-weight: 700; color: var(--ink); }
+.cover h1.doctitle {
+  font-size: 30pt; border-bottom: none; padding-bottom: 0;
+  color: var(--ink); margin: 6px 0 4px; line-height: 1.15;
+}
+.cover .docsubtitle { font-size: 14pt; color: var(--brand-dark); font-weight: 600; margin-bottom: 26px; }
+.cover .lede { font-size: 11.5pt; color: var(--ink-soft); max-width: 130mm; }
+.cover .meta-table { margin-top: 30px; border-collapse: collapse; font-size: 10.3pt; }
+.cover .meta-table td { padding: 4px 14px 4px 0; vertical-align: top; }
+.cover .meta-table td.k { color: var(--ink-soft); white-space: nowrap; }
+.cover .meta-table td.v { color: var(--ink); font-weight: 600; }
+.cover .footer-block { border-top: 1px solid var(--line); padding-top: 14px; font-size: 9.3pt; color: var(--ink-soft); }
+
+/* ---------- Tables ---------- */
+table { width: 100%; border-collapse: collapse; margin: 10px 0 16px; font-size: 10.2pt; }
+table.roster th, table.roster td { font-size: 9.8pt; }
+th, td { border: 1px solid var(--line); padding: 6px 9px; text-align: left; vertical-align: top; }
+thead th { background: var(--brand); color: #fff; font-weight: 600; }
+tbody tr:nth-child(even) { background: var(--brand-tint); }
+table.plain, table.plain th, table.plain td { border: none; }
+table.plain thead th { background: none; color: var(--brand-dark); border-bottom: 2px solid var(--brand); }
+
+/* ---------- Code / mono ---------- */
+code, pre { font-family: 'Cascadia Code', Consolas, 'Courier New', monospace; font-size: 9.5pt; }
+pre {
+  background: var(--slate-tint); border: 1px solid var(--line-soft); border-radius: 6px;
+  padding: 10px 12px; overflow-x: auto; white-space: pre-wrap; overflow-wrap: anywhere;
+}
+code.inline { background: var(--slate-tint); padding: 1px 5px; border-radius: 4px; }
+
+/* ---------- Callouts ---------- */
+.callout { border-radius: 7px; padding: 10px 14px; margin: 12px 0; font-size: 10.2pt; border: 1px solid; page-break-inside: avoid; }
+.callout .label { font-weight: 700; text-transform: uppercase; font-size: 8.6pt; letter-spacing: .05em; display: block; margin-bottom: 3px; }
+.callout.note { background: var(--brand-tint); border-color: var(--line); }
+.callout.note .label { color: var(--brand-dark); }
+.callout.deviation { background: var(--amber-tint); border-color: #f2d5a8; }
+.callout.deviation .label { color: var(--amber); }
+.callout.risk { background: var(--red-tint); border-color: #f3c9c5; }
+.callout.risk .label { color: var(--red); }
+
+/* ---------- Figures / diagrams ---------- */
+figure { margin: 14px 0 18px; page-break-inside: avoid; }
+figure svg { width: 100%; height: auto; display: block; background: #fff; }
+figcaption { font-size: 9.6pt; color: var(--ink-soft); margin-top: 6px; text-align: center; }
+figcaption b { color: var(--ink); }
+
+/* ---------- Badges / pills ---------- */
+.pill { display: inline-block; padding: 1px 8px; border-radius: 100px; font-size: 8.6pt; font-weight: 700; letter-spacing: .02em; }
+.pill.get { background: #e3f0ff; color: #1d4e89; }
+.pill.post { background: #e6f4ea; color: var(--brand-dark); }
+.pill.patch { background: #fdf1de; color: var(--amber); }
+.pill.delete { background: var(--red-tint); color: var(--red); }
+.pill.role { background: var(--slate-tint); color: var(--slate); }
+
+/* ---------- Table of contents ---------- */
+.toc { list-style: none; padding-left: 0; }
+.toc li { display: flex; justify-content: space-between; border-bottom: 1px dotted var(--line); padding: 4px 0; margin-bottom: 0; }
+.toc li .num { color: var(--brand); font-weight: 700; width: 26px; flex-shrink: 0; }
+.toc a { text-decoration: none; color: var(--ink); flex: 1; }
+.toc .pg { color: var(--ink-soft); }
+
+/* ---------- Running section header on interior pages ---------- */
+.runhead { font-size: 8.6pt; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-soft); margin-bottom: 4px; }
+
+/* Utility */
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.center { text-align: center; }
+.mt0 { margin-top: 0; }
+.tag-list span { display: inline-block; background: var(--slate-tint); border-radius: 4px; padding: 2px 8px; margin: 2px 4px 2px 0; font-size: 9pt; }

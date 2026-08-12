@@ -1,0 +1,50 @@
+# Render Blueprint for the FarmConnect Ghana API.
+# Deploy: render.com → New → Blueprint → point at this repo → Render reads this file automatically.
+# Database (Postgres) and cache (Redis) are NOT defined here — this project uses free-tier
+# Supabase (Postgres) and Upstash (Redis) instead of Render's own managed services; paste their
+# connection strings into DATABASE_URL / REDIS_URL below after the service is created.
+# See docs/submission/Deployment_Guide.pdf for the full, numbered walkthrough.
+
+services:
+  - type: web
+    name: farmconnect-api
+    runtime: node
+    plan: free
+    region: oregon
+    buildCommand: >
+      npm install &&
+      npm run build -w @farmconnect/shared &&
+      npx prisma generate --schema=apps/api/prisma/schema.prisma &&
+      npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma &&
+      npm run build -w @farmconnect/api
+    startCommand: node apps/api/dist/server.js
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: DATABASE_URL
+        sync: false
+      - key: REDIS_URL
+        sync: false
+      - key: CORS_ORIGIN
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 12h
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_EXPIRES_IN
+        value: 30d
+      - key: OTP_TTL_SECONDS
+        value: 300
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: WEATHER_API_KEY
+        sync: false
+      - key: GIANTSMS_API_TOKEN
+        sync: false
+      - key: GIANTSMS_SENDER_ID
+        sync: false

@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>FarmConnect Ghana — Project Documentation</title>
+<link rel="stylesheet" href="assets/report.css">
+<style>
+.stack-diagram { display: flex; justify-content: space-between; gap: 8px; margin: 14px 0; flex-wrap: wrap; }
+.stack-diagram .box { flex: 1; min-width: 110px; border: 1.5px solid #1B7A3D; background: #eef6ee; border-radius: 8px; padding: 8px; text-align: center; font-size: 9.3pt; }
+.stack-diagram .box b { display: block; color: #14532d; font-size: 9.8pt; }
+.docmap { margin: 10px 0 18px; }
+.docmap li { margin-bottom: 6px; }
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<section class="cover">
+  <div>
+    <div class="brandmark"><span class="dot">FC</span><span class="name">FarmConnect Ghana</span></div>
+    <div class="kicker">Complete Project Documentation</div>
+    <h1 class="doctitle">Project<br>Documentation</h1>
+    <div class="docsubtitle">A Mobile-First Marketplace Connecting Ghanaian Smallholder Farmers to Buyers, Market Prices, and Agricultural Advisory Services</div>
+    <p class="lede">The master narrative of this capstone project — background, problem, objectives, stakeholders, design rationale, challenges, limitations, and conclusion — cross-referencing five companion technical documents for full detail rather than repeating them wholesale.</p>
+  </div>
+  <table class="meta-table">
+    <tr><td class="k">Course</td><td class="v">CSCD602 — Advanced Software Engineering, Capstone Project</td></tr>
+    <tr><td class="k">Institution</td><td class="v">University of Ghana — Department of Computer Science</td></tr>
+    <tr><td class="k">Group</td><td class="v">Angry Nerds</td></tr>
+    <tr><td class="k">Project title</td><td class="v">FarmConnect Ghana</td></tr>
+    <tr><td class="k">Document version</td><td class="v">1.0</td></tr>
+    <tr><td class="k">Date</td><td class="v">12 August 2026</td></tr>
+    <tr><td class="k">Individual submission by</td><td class="v">George Boadu Junior — 22427354</td></tr>
+  </table>
+  <div class="footer-block">This individual submission is prepared by George Boadu Junior on behalf of Group Angry Nerds, per the CSCD602 individual-submission requirement.</div>
+</section>
+
+<!-- ============ GROUP INFO ============ -->
+<section class="section">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>Group Information</h1>
+<table class="roster">
+<thead><tr><th>#</th><th>Group member</th><th>Student ID</th><th>Major contribution</th></tr></thead>
+<tbody>
+<tr><td>1</td><td><strong>George Boadu Junior</strong> (this submission)</td><td>22427354</td><td>Requirements engineering &amp; SRS authorship, system architecture &amp; design, full-stack implementation (API + PWA), test authoring/execution, deployment engineering, and project documentation.</td></tr>
+<tr><td>2</td><td>Marvin Kabutey</td><td>22425067</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>3</td><td>Obed Borley Obuadey</td><td>22424177</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>4</td><td>Richmond Gakpetor</td><td>22424720</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>5</td><td>Isichei Phelim</td><td>22424142</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>6</td><td>Edem Afflu</td><td>22424139</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>7</td><td>Emmanuel Okyere Gyateng</td><td>22424179</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>8</td><td>Edinam Ahadzie</td><td>22424539</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>9</td><td>Desmond Techie</td><td>22424555</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>10</td><td>Irene Hamilton</td><td>22424758</td><td><em>[Confirm with group before final submission]</em></td></tr>
+<tr><td>11</td><td>Bernard Tetteh Djangbah</td><td>22424329</td><td><em>[Confirm with group before final submission]</em></td></tr>
+</tbody>
+</table>
+
+<h2>How this documentation package is organised</h2>
+<p>To keep each deliverable focused and to avoid a single unmanageable document, the required content is split across seven PDFs. This document is the narrative spine; the other six hold the deep technical/operational detail and are cross-referenced throughout rather than duplicated.</p>
+<ul class="docmap">
+<li><strong>Project_Documentation.pdf</strong> (this document) — background, problem, objectives, stakeholders, design rationale, implementation summary, challenges, limitations, conclusion, references, appendices.</li>
+<li><strong>SRS.pdf</strong> — full IEEE-830 Software Requirements Specification, with a v1.0→delivered-system reconciliation section.</li>
+<li><strong>Design_Documentation.pdf</strong> — architecture, use-case/class/sequence/state diagrams, ER diagram, database design, UI wireframes, technology architecture.</li>
+<li><strong>Testing_Report.pdf</strong> — real automated + manual test evidence, defect log, UAT checklist.</li>
+<li><strong>User_Manual.pdf</strong> — step-by-step guide for Farmers, Buyers, and Administrators, plus the SMS command reference.</li>
+<li><strong>Maintenance_and_Evolution.pdf</strong> — maintenance categories, bug-fixing process, dependency/security update policy, scalability plan, and the future roadmap.</li>
+<li><strong>Deployment_Guide.pdf</strong> — the numbered runbook actually used to put the live system online on a $0/month hosting stack.</li>
+</ul>
+</section>
+
+<!-- ============ TOC ============ -->
+<section class="section">
+<h1>Table of Contents</h1>
+<ul class="toc">
+<li><span class="num">1</span><a href="#p1">Introduction &amp; Background</a></li>
+<li><span class="num">2</span><a href="#p2">Problem Statement</a></li>
+<li><span class="num">3</span><a href="#p3">Aim &amp; Objectives</a></li>
+<li><span class="num">4</span><a href="#p4">Stakeholder Analysis</a></li>
+<li><span class="num">5</span><a href="#p5">Requirements Gathering &amp; Analysis</a></li>
+<li><span class="num">6</span><a href="#p6">Software Requirements Specification</a></li>
+<li><span class="num">7</span><a href="#p7">System Analysis &amp; Design</a></li>
+<li><span class="num">8</span><a href="#p8">Architecture</a></li>
+<li><span class="num">9</span><a href="#p9">Database / Data Design</a></li>
+<li><span class="num">10</span><a href="#p10">User-Interface Design</a></li>
+<li><span class="num">11</span><a href="#p11">Implementation</a></li>
+<li><span class="num">12</span><a href="#p12">Testing &amp; Quality Assurance</a></li>
+<li><span class="num">13</span><a href="#p13">Deployment</a></li>
+<li><span class="num">14</span><a href="#p14">User Manual</a></li>
+<li><span class="num">15</span><a href="#p15">System Administration &amp; Maintenance Guide</a></li>
+<li><span class="num">16</span><a href="#p16">Security Considerations</a></li>
+<li><span class="num">17</span><a href="#p17">Challenges &amp; Solutions</a></li>
+<li><span class="num">18</span><a href="#p18">Limitations</a></li>
+<li><span class="num">19</span><a href="#p19">Maintenance Strategy</a></li>
+<li><span class="num">20</span><a href="#p20">Future System Evolution / Enhancements</a></li>
+<li><span class="num">21</span><a href="#p21">Conclusion</a></li>
+<li><span class="num">22</span><a href="#p22">References</a></li>
+<li><span class="num">23</span><a href="#p23">Appendices</a></li>
+</ul>
+</section>
+
+<!-- ============ 1 ============ -->
+<section class="section" id="p1">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>1. Introduction &amp; Background</h1>
+<p>Ghana has over 2.7 million smallholder farmers, most of whom farm fewer than 2 hectares and sell into informal, fragmented supply chains with little price transparency. FarmConnect Ghana is a mobile-first web platform built to close that gap directly: it lets a farmer publish what they have to sell, lets a buyer find it and pay for it, and wraps that core transaction in the supporting infrastructure a real rural market needs — live price information, an AI-powered agricultural advisor, a feature-phone SMS channel for users without a smartphone, and cooperative/trust/dispute-resolution mechanisms.</p>
+<p>This project was undertaken as the CSCD602 Advanced Software Engineering capstone, carried through the complete software engineering lifecycle — requirements engineering, system analysis and design, implementation, testing, deployment, and documentation — by Group Angry Nerds, University of Ghana, Department of Computer Science. It is not a mock-up: every screen, endpoint, and workflow described in this documentation set exists in running, tested code (see the Testing Report) and is reachable at the live application URL in Links.txt/README.</p>
+</section>
+
+<!-- ============ 2 ============ -->
+<section class="section" id="p2">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>2. Problem Statement</h1>
+<ul>
+<li><strong>No direct market access.</strong> Smallholder farmers typically sell through middlemen who, by the project's own market research (cited in the original SRS), capture up to 60% of the potential profit margin.</li>
+<li><strong>No price transparency.</strong> Without a reliable, current view of commodity prices, farmers cannot tell whether an offered price is fair, weakening their negotiating position further.</li>
+<li><strong>Post-harvest loss.</strong> An estimated 30–40% of harvested produce spoils before it reaches a buyer, a direct consequence of slow, informal, geographically limited sales channels.</li>
+<li><strong>Digital exclusion.</strong> Existing digital agriculture platforms are largely designed for smartphone-first, English-only, high-connectivity users — excluding exactly the population (feature-phone users, Twi speakers, low-end Android devices, intermittent 3G) this project targets.</li>
+<li><strong>No trusted way to transact remotely.</strong> A farmer and a buyer who have never met have no shared trust signal and no safe way to hand over money for produce that hasn't been seen yet — a real barrier to any farmer-to-buyer digital marketplace in this context, not a hypothetical one.</li>
+</ul>
+</section>
+
+<!-- ============ 3 ============ -->
+<section class="section" id="p3">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>3. Aim &amp; Objectives</h1>
+<p><strong>Aim:</strong> to design, build, test, and deploy a complete, functional, low-cost digital marketplace that connects Ghanaian smallholder farmers directly to buyers, market price information, and agricultural advisory services — accessible on both smartphones and basic feature phones.</p>
+<h2>Objectives</h2>
+<ol>
+<li>Enable farmers to list produce (crop, quantity, price, harvest date, photos, location) and buyers to discover and order it, without a middleman.</li>
+<li>Provide a safe, zero-custody payment hand-off via Mobile Money, with a human-verifiable confirmation step and an administrator-arbitrated dispute path.</li>
+<li>Surface live, per-crop market prices so farmers can negotiate from a position of information, not guesswork.</li>
+<li>Provide an AI-powered advisory channel for crop, pest, and weather guidance, including photo-based pest identification.</li>
+<li>Support users with no smartphone or data plan via a parallel SMS command channel covering every critical action.</li>
+<li>Build trust between strangers transacting for the first time via a mutual rating system and an administrator moderation/dispute layer.</li>
+<li>Deliver the system bilingually (English/Twi) and accessibly, and deploy it to a publicly reachable, live URL.</li>
+</ol>
+</section>
+
+<!-- ============ 4 ============ -->
+<section class="section" id="p4">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>4. Stakeholder Analysis</h1>
+<table>
+<thead><tr><th style="width:16%">Stakeholder</th><th style="width:16%">Interest</th><th>How the system serves them</th></tr></thead>
+<tbody>
+<tr><td>Smallholder farmers</td><td>Primary user, seller</td><td>Listing creation, price feed, advisory chat, SMS fallback, direct Mobile Money payment with no platform fee.</td></tr>
+<tr><td>Buyers (individuals, retailers, wholesalers)</td><td>Primary user, purchaser</td><td>Search/filter, farmer trust signals, transparent order/payment tracking, dispute path if something goes wrong.</td></tr>
+<tr><td>Platform administrators</td><td>Operate &amp; moderate the platform</td><td>Admin Portal — verify/suspend accounts, moderate listings, resolve payment disputes.</td></tr>
+<tr><td>Agricultural extension officers / NGOs</td><td>Named in the original SRS as potential pilot partners; monitor regional trends</td><td>Reserved (<code class="inline">EXTENSION</code>) role in the data model, activation planned as Maintenance &amp; Evolution Plan Phase 12 — see §20.</td></tr>
+<tr><td>Course instructors / examiners</td><td>Assess engineering rigor and completeness</td><td>This documentation set, the live deployment, the source repository, and the test evidence in the Testing Report.</td></tr>
+<tr><td>Future maintainers</td><td>Keep the system running and evolving</td><td>The Maintenance &amp; Future Evolution Plan, migration history, and a documented bug-fixing/release process.</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ============ 5 ============ -->
+<section class="section" id="p5">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>5. Requirements Gathering &amp; Analysis</h1>
+<p>Requirements were gathered by combining (a) published statistics on Ghana's smallholder-farming sector and known post-harvest-loss/middleman-margin figures (cited in SRS §1.4), (b) domain reasoning about the concrete constraints of the target user (feature phones, intermittent connectivity, Twi as a first language for many farmers, no bank/card relationship but near-universal Mobile Money access), and (c) iterative refinement of an AI-assisted first draft (disclosed in full in SRS Appendix A) into a structured IEEE-830 specification, which the team then reviewed against what could realistically be built, tested, and deployed within a single-semester capstone.</p>
+<p>The single most important analytical step taken <em>after</em> v1.0 of the SRS was written was reconciling it against implementation reality once real engineering constraints appeared — most significantly, that this team could not obtain production Mobile Money merchant/PSP API access, and that no public Ghana Commodity Exchange API exists to integrate with. Rather than silently drop or quietly reinterpret those requirements, every such gap was analysed, a concrete alternative was designed, and the decision and its rationale were written back into the SRS as a dedicated reconciliation section (SRS §9) — the analytical output of this project's requirements work is therefore the full v1.0→v2.0 diff, not just the final list of what got built.</p>
+</section>
+
+<!-- ============ 6 ============ -->
+<section class="section" id="p6">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>6. Software Requirements Specification</h1>
+<p>See <strong>SRS.pdf</strong> for the complete document. Summary: 14 functional requirements (FR-01–FR-14) and 13 non-functional requirements across performance, security, usability, reliability, and maintainability, each carrying a Status column that records whether it was delivered as specified, delivered with an approved and documented deviation, or explicitly deferred. Section 9 of the SRS is a dedicated reconciliation between the original v1.0 baseline and the delivered v2.0 system — the single most load-bearing section for understanding <em>why</em> the system looks the way it does.</p>
+</section>
+
+<!-- ============ 7 ============ -->
+<section class="section" id="p7">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>7. System Analysis &amp; Design</h1>
+<p>See <strong>Design_Documentation.pdf</strong> for the complete set of diagrams. In summary, the system was analysed and designed as a three-tier architecture (PWA client / REST API / Postgres+Redis data layer, plus four external service integrations), with:</p>
+<ul>
+<li>A <strong>use-case diagram</strong> covering 8 use cases across 4 actors (Farmer, Buyer, Administrator, and the reserved Extension Officer role).</li>
+<li>A <strong>class diagram</strong> and a full <strong>entity-relationship diagram</strong> covering all 10 database tables, their fields, and cardinalities.</li>
+<li>Three <strong>sequence diagrams</strong> (authentication/token-refresh, the order/payment lifecycle including the dispute branch, and the AI advisory flow).</li>
+<li>A <strong>state diagram</strong> for the <code class="inline">Order</code> status machine — the most behaviourally important piece of the whole system.</li>
+<li>A <strong>component diagram</strong> showing the module-per-domain backend layout and its dependency on the shared validation/enum package.</li>
+<li>Low-fidelity <strong>UI wireframes</strong> of the actual delivered screens.</li>
+</ul>
+</section>
+
+<!-- ============ 8 ============ -->
+<section class="section" id="p8">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>8. Architecture</h1>
+<div class="stack-diagram">
+<div class="box"><b>Client</b>React PWA (Vite, TS) — Farmer/Buyer/Admin UI, bilingual, offline-caching</div>
+<div class="box"><b>API</b>Node.js/Express (TS) — 11 domain modules, JWT auth, zod validation</div>
+<div class="box"><b>Data</b>PostgreSQL 16 (Prisma) + Redis 7</div>
+<div class="box"><b>External</b>Gemini · OpenWeatherMap · GiantSMS · Africa's Talking</div>
+</div>
+<p>Full deployment topology, provider rationale, and the technology-choice justification table are in Design_Documentation.pdf §2 and §10; the live-hosting version of this same architecture (Vercel/Render/Supabase/Upstash) is in Deployment_Guide.pdf.</p>
+</section>
+
+<!-- ============ 9 ============ -->
+<section class="section" id="p9">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>9. Database / Data Design</h1>
+<p>PostgreSQL 16 via Prisma ORM, 10 tables (<code class="inline">users</code>, <code class="inline">listings</code>, <code class="inline">orders</code>, <code class="inline">ratings</code>, <code class="inline">coop_groups</code>, <code class="inline">coop_members</code>, <code class="inline">chat_messages</code>, <code class="inline">notifications</code>, <code class="inline">price_snapshots</code>, <code class="inline">sms_inbound_logs</code>), built up over 7 tracked migrations. Data integrity is enforced at the database level wherever possible (unique constraints for "one co-op per farmer" and "one rating per rater per order," not just application checks). Full field-level schema, indexes, and the ER diagram are in Design_Documentation.pdf §6.</p>
+</section>
+
+<!-- ============ 10 ============ -->
+<section class="section" id="p10">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>10. User-Interface Design</h1>
+<p>Mobile-first, bilingual (English/Twi), with a bottom-tab navigation that differs by role (Farmer: Home/Listings/Orders/Prices/Profile; Buyer: Market/Orders/Advisor/Prices/Profile) and a separate, desktop-oriented Admin Portal with no bottom navigation. Colour palette, screen names, and copy were carried forward from an early Figma-Make UX prototype (SRS Appendix B) into the real implementation, though the prototype itself was never pixel-matched. See Design_Documentation.pdf §9 for wireframes of every major screen, and User_Manual.pdf for what each screen actually does from a user's point of view.</p>
+</section>
+
+<!-- ============ 11 ============ -->
+<section class="section" id="p11">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>11. Implementation</h1>
+<h2>11.1 Stack</h2>
+<table class="plain">
+<tbody>
+<tr><td style="width:160px"><strong>Frontend</strong></td><td>Vite + React 18 + TypeScript, Tailwind CSS, i18next, vite-plugin-pwa</td></tr>
+<tr><td><strong>Backend</strong></td><td>Node.js + Express 4 + TypeScript, Prisma ORM, ioredis, Zod validation, pino logging</td></tr>
+<tr><td><strong>Data</strong></td><td>PostgreSQL 16, Redis 7</td></tr>
+<tr><td><strong>Monorepo</strong></td><td>npm workspaces — <code class="inline">apps/web</code>, <code class="inline">apps/api</code>, <code class="inline">packages/shared</code></td></tr>
+</tbody>
+</table>
+<h2>11.2 What was actually built</h2>
+<p>All 7 planned implementation phases are complete: (0) scaffolding, (1) phone+OTP auth with role selection, (2) listings + marketplace search, (3) orders + manual Mobile Money reconciliation, (4) AI advisory chatbot with photo pest-ID, (5) live price feed + notifications + SMS fallback, (6) co-ops + admin/moderation + ratings, (7) PWA offline caching + full bilingual pass + accessibility pass. This is not a partial or prototype build — every use case in §7 is backed by working, tested code (Testing Report §3/§5).</p>
+<h2>11.3 Code organisation</h2>
+<p>The backend is organised into 11 domain modules (auth, users, listings, orders, prices, advisory, notifications, co-ops, admin, sms-gateway, uploads), each with its own routes/controller/service files, sharing common middleware (<code class="inline">requireAuth</code>, <code class="inline">requireRole</code>, <code class="inline">validateBody/Query</code>) and a single Prisma client. The frontend mirrors this with a page-per-screen structure and a thin, centralised API client that handles token refresh transparently. Both apps depend on <code class="inline">packages/shared</code> for every enum and Zod validation schema, so the two apps cannot silently drift apart on what a valid request/role/status looks like.</p>
+<h2>11.4 Error handling &amp; validation</h2>
+<p>Every request body/query is validated against a Zod schema before it reaches business logic (400 on failure, with field-level error detail); every domain error (e.g. "not your listing," "listing already pending," "momo not set up") is a typed error class mapped to the correct HTTP status by a single <code class="inline">handleKnownErrors</code> helper, rather than ad hoc <code class="inline">try/catch</code> scattered per route.</p>
+</section>
+
+<!-- ============ 12 ============ -->
+<section class="section" id="p12">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>12. Testing &amp; Quality Assurance</h1>
+<p>See <strong>Testing_Report.pdf</strong> for the complete, evidence-based report. Headline results, all captured on 12 August 2026 against a live Postgres+Redis instance:</p>
+<ul>
+<li><strong>69/69 automated tests passing</strong> across 17 test files (unit + integration) in all three workspaces.</li>
+<li><strong>11/11 manual system/security smoke tests passing</strong> against the actually-running API (auth guards, role guards, single-use OTP, input validation).</li>
+<li><strong>All 7 use cases (UC-01–UC-07) traced to passing automated and manual tests.</strong></li>
+<li><strong>One real defect found and fixed during this submission cycle</strong> (a mislinted-but-actually-clean codebase, traced to an ESLint config gap — full before/after evidence in the report) and one open, scoped performance finding with a concrete recommended fix.</li>
+</ul>
+</section>
+
+<!-- ============ 13 ============ -->
+<section class="section" id="p13">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>13. Deployment</h1>
+<p>See <strong>Deployment_Guide.pdf</strong> for the full numbered runbook, and <strong>Links.txt/README</strong> (submitted alongside this package) for the actual live URLs and credentials. The system is deployed on an entirely free-forever hosting stack chosen specifically to avoid time-limited trial credits:</p>
+<div class="stack-diagram">
+<div class="box"><b>Vercel</b>Web PWA</div>
+<div class="box"><b>Render</b>API (Node/Express)</div>
+<div class="box"><b>Supabase</b>PostgreSQL 16</div>
+<div class="box"><b>Upstash</b>Redis</div>
+</div>
+<p>Deployment configuration is checked into the repository (<code class="inline">vercel.json</code>, <code class="inline">render.yaml</code>) so both platforms redeploy automatically on every push to <code class="inline">main</code> — deployment is not a manual, undocumented, one-off act.</p>
+</section>
+
+<!-- ============ 14 ============ -->
+<section class="section" id="p14">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>14. User Manual</h1>
+<p>See <strong>User_Manual.pdf</strong> for the complete guide, covering: getting started and account creation (no password, ever — phone+OTP only); the full Farmer guide (Mobile Money setup, listing produce, handling an order and getting paid, disputes, co-ops, ratings, prices, the AI advisor); the full Buyer guide (searching, ordering, paying, confirming delivery); the Administrator guide (verifying/suspending users, moderating listings, resolving disputes); the complete SMS command reference for feature-phone users; and a troubleshooting/FAQ section.</p>
+</section>
+
+<!-- ============ 15 ============ -->
+<section class="section" id="p15">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>15. System Administration &amp; Maintenance Guide</h1>
+<p>See <strong>Maintenance_and_Evolution.pdf</strong> §2–§5 for the complete operational guide: the bug-fixing process and severity/response targets, version-control and release strategy (Git/GitHub, migration-based schema changes, redeploy-to-rollback), the dependency-update policy, and the security-update process (secret rotation, CVE handling, and two concrete recommended hardening steps — httpOnly refresh-token cookies and IP-based rate limiting — that are not yet implemented but are scoped and ready to pick up).</p>
+<p>Administrator account provisioning specifically: there is no self-service admin sign-up (SRS §9.3); an administrator is created by running <code class="inline">npx tsx apps/api/prisma/seed.ts --phone &lt;number&gt; --name &lt;name&gt;</code> against the production database (Deployment_Guide.pdf Step 8), after which that phone number authenticates through the ordinary phone+OTP flow like any other user.</p>
+</section>
+
+<!-- ============ 16 ============ -->
+<section class="section" id="p16">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>16. Security Considerations</h1>
+<table>
+<thead><tr><th style="width:26%">Area</th><th>Position taken</th></tr></thead>
+<tbody>
+<tr><td>Authentication</td><td>Phone + OTP (no passwords to leak or reuse); OTP hashed at rest (bcrypt) with a 5-minute TTL and single-use deletion; 20/hour/phone rate limit against abuse.</td></tr>
+<tr><td>Session management</td><td>Short-lived (12h) JWT access tokens; 30-day refresh tokens that are single-use and rotate on every refresh via a Redis allowlist — logout genuinely revokes a session, which a bare stateless JWT cannot do on its own.</td></tr>
+<tr><td>Authorisation</td><td>Every route explicitly declares its required role (<code class="inline">requireRole</code>); ownership checks (e.g. "is this your listing/order?") are enforced in the service layer, not assumed from the UI. Verified by manual probing in Testing Report §4.</td></tr>
+<tr><td>Payment security</td><td>The platform never stores or transmits a Mobile Money PIN, card number, or wallet credential — by construction, not by policy (SRS §9.1/NFR-S3).</td></tr>
+<tr><td>Input validation</td><td>Every request body/query validated against a Zod schema before touching business logic (SRS NFR-S2-adjacent, demonstrated in Testing Report §4 test 11).</td></tr>
+<tr><td>Known residual risk</td><td>Access/refresh tokens are stored in browser <code class="inline">localStorage</code>, not httpOnly cookies — a documented XSS-exposure trade-off (SRS §9, Design Documentation "cross-cutting concerns") with a scoped remediation plan in Maintenance_and_Evolution.pdf §5.</td></tr>
+<tr><td>Regulatory posture</td><td>By never taking custody of funds, FarmConnect avoids acting as a payment service provider under Bank of Ghana e-money rules (SRS §6.1) — a deliberate design choice, not an oversight.</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ============ 17 ============ -->
+<section class="section" id="p17">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>17. Challenges &amp; Solutions</h1>
+<table>
+<thead><tr><th style="width:30%">Challenge</th><th>Solution adopted</th></tr></thead>
+<tbody>
+<tr><td>No realistic path to production Mobile Money merchant/PSP API access within a single-semester capstone.</td><td>Replaced automated gateway escrow with a manual, human-verified reconciliation workflow that never takes custody of funds — safer regulatory posture, achievable in the available time (SRS §9.1).</td></tr>
+<tr><td>No public, developer-accessible Ghana Commodity Exchange price API exists.</td><td>Built a self-contained, realistically-behaving simulated price feed behind a thin service boundary, so a real integration can be swapped in later without touching the UI or the rest of the API (SRS §9.2).</td></tr>
+<tr><td>The SRS gave ratings, co-ops, and admin/moderation one sentence of intent each, with no workflow or data model.</td><td>Designed each from scratch during implementation, with the reasoning for every non-obvious choice (one co-op per farmer, leadership succession rule, no self-service admin signup) recorded in Design_Documentation.pdf §11, not left implicit in code.</td></tr>
+<tr><td>Serving both smartphone and feature-phone users from one system.</td><td>A parallel SMS command grammar (§Testing Report UC coverage; User_Manual.pdf §5) covering every critical action, sharing the same underlying data model and business logic as the app.</td></tr>
+<tr><td>Verifying the system actually works, not just believing it does.</td><td>Layered testing strategy (unit → integration against a live database → manual smoke tests against the actually-running server) — see Testing_Report.pdf §1, and the deliberate choice to run tests against real Postgres/Redis rather than mocks, since several real defect classes only appear against real database/cache behaviour.</td></tr>
+</tbody>
+</table>
+</section>
+
+<!-- ============ 18 ============ -->
+<section class="section" id="p18">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>18. Limitations</h1>
+<p>Stated plainly, as good engineering practice requires:</p>
+<ul>
+<li>Payments are a manual reconciliation process, not an automated escrow — trust and diligence from both parties still matter, backstopped by (but not eliminated by) the dispute-resolution workflow.</li>
+<li>Market prices are a realistic simulation, not sourced from a real exchange, because no such public API exists to integrate with.</li>
+<li>NFR-P2 (10,000 concurrent users) and NFR-R1 (99.5% uptime) are architecturally plausible but not empirically load-tested at this submission's scale (Testing Report §11).</li>
+<li>Frontend automated test coverage is thin relative to the backend (2 component test files versus 14 integration test files) — the backend carries essentially all business logic, but page-level UI regression coverage is a known gap (Testing Report §11).</li>
+<li>The <code class="inline">EXTENSION</code> (Agricultural Extension Officer) role named in the original SRS is reserved in the data model but has no implemented screens yet.</li>
+<li>Render's free-tier web service sleeps after ~15 minutes idle, adding a ~30–50s cold-start delay to the first request after a period of inactivity (Deployment_Guide.pdf) — acceptable for grading/demo use, not for a real production pilot at scale.</li>
+</ul>
+</section>
+
+<!-- ============ 19 ============ -->
+<section class="section" id="p19">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>19. Maintenance Strategy</h1>
+<p>See <strong>Maintenance_and_Evolution.pdf</strong> §1–§6 for the complete strategy: all four ISO/IEC 14764 maintenance categories (corrective, adaptive, perfective, preventive) mapped against real, already-identified items in this codebase rather than generic examples; a concrete bug-fixing process with severity-based response targets; a Git/GitHub-based version-control and release strategy where every release is a redeployable commit; a dependency/library update cadence; a security-update process; and a scalability plan naming the specific bottlenecks (search, uploads storage, price-tick/notification fan-out) that would need addressing first under real growth, and what to do about each.</p>
+</section>
+
+<!-- ============ 20 ============ -->
+<section class="section" id="p20">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>20. Future System Evolution / Enhancements</h1>
+<p>See <strong>Maintenance_and_Evolution.pdf</strong> §7–§10 for the full roadmap. In brief, five prioritised, independently-shippable future phases: (8) hardening &amp; observability — close the open performance finding, broaden frontend test coverage, add real load testing; (9) real-time &amp; push — replace REST polling with WebSocket/Web Push; (10) logistics &amp; delivery tracking — the domain explicitly excluded from v1 scope; (11) an optional, feature-flagged licensed Mobile Money aggregator for users/regions that outgrow manual reconciliation; (12) activating the reserved Extension Officer role for agricultural staff and NGO partners. AI/emerging-technology enhancements are scoped as extensions of the capability already in production (Gemini + weather context + price history), not speculative new dependencies — proactive weather-risk alerts, price-trend summarisation, a listing-photo-quality assistant, admin fraud-signal ranking, and voice input for search.</p>
+</section>
+
+<!-- ============ 21 ============ -->
+<section class="section" id="p21">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>21. Conclusion</h1>
+<p>FarmConnect Ghana set out to connect Ghanaian smallholder farmers directly to buyers, fair price information, and agricultural advisory services, in a form that genuinely fits its target users — including those on feature phones with no data plan. The delivered system meets that aim: every functional requirement in the SRS is either implemented as specified or implemented via a documented, justified deviation; every core use case is covered by both automated tests against a live database and manual verification against the actually-running server; the application is deployed to a live, publicly reachable URL on infrastructure chosen specifically to remain free and accessible through grading and beyond; and every simplification, trade-off, and open item is written down rather than glossed over, with a concrete plan for what comes next. The gap between "software requirements specification" and "shipped, working system" is where most real-world engineering difficulty lives — this project's documentation set is built to make that gap, and how it was closed, fully visible to an examiner.</p>
+</section>
+
+<!-- ============ 22 ============ -->
+<section class="section" id="p22">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>22. References</h1>
+<ul>
+<li>IEEE Std 830-1998, <em>IEEE Recommended Practice for Software Requirements Specifications</em>.</li>
+<li>ISO/IEC 14764:2006, <em>Software Engineering — Software Life Cycle Processes — Maintenance</em>.</li>
+<li>MTN Mobile Money, Telecel Cash, and AirtelTigo Money — public product documentation.</li>
+<li>Google Gemini API documentation — <a href="https://ai.google.dev">ai.google.dev</a>.</li>
+<li>OpenWeatherMap Current Weather API documentation — <a href="https://openweathermap.org/api">openweathermap.org/api</a>.</li>
+<li>Africa's Talking SMS API documentation — <a href="https://africastalking.com">africastalking.com</a>.</li>
+<li>GiantSMS API documentation — <a href="https://giantsms.com">giantsms.com</a>.</li>
+<li>Prisma ORM documentation — <a href="https://www.prisma.io/docs">prisma.io/docs</a>.</li>
+<li>Vercel, Render, Supabase, and Upstash platform documentation (see Deployment_Guide.pdf for exact links used).</li>
+<li>FarmConnect Ghana project presentation and original SRS, Group Angry Nerds, May 2026.</li>
+</ul>
+</section>
+
+<!-- ============ 23 ============ -->
+<section class="section" id="p23">
+<div class="runhead">FarmConnect Ghana · Project Documentation</div>
+<h1>23. Appendices</h1>
+<h2>Appendix A — AI-Assisted Drafting Disclosure</h2>
+<p>In accordance with course AI-disclosure requirements: the original v1.0 SRS was drafted with AI assistance (Claude, claude.ai) via three disclosed prompts, reviewed and finalised by the team, then reconciled against the delivered system in v2.0 (full prompt text in SRS Appendix A). The early UX/flow prototype referenced during design was produced via Figma Make (four disclosed prompts, SRS Appendix B). The v2.0 SRS reconciliation, all five other companion documents, and this master document were authored by George Boadu Junior with AI assistance (Claude Code) for structuring, diagramming, and drafting, working directly from the project's actual source code, test output, and configuration — every technical claim in this documentation set was verified against the real repository and, where applicable, a live running instance of the system, not generated from description alone.</p>
+<h2>Appendix B — Third-Party Services Acknowledgement</h2>
+<table class="plain">
+<tbody>
+<tr><td style="width:200px">Google Gemini</td><td>AI advisory chat + vision-based pest identification</td></tr>
+<tr><td>OpenWeatherMap</td><td>Weather context for the advisory chatbot</td></tr>
+<tr><td>GiantSMS</td><td>Outbound SMS (OTP, notifications, SMS-command replies)</td></tr>
+<tr><td>Africa's Talking</td><td>Inbound SMS command webhook</td></tr>
+<tr><td>Vercel, Render, Supabase, Upstash</td><td>Hosting (web, API, database, cache respectively)</td></tr>
+<tr><td>Prisma, Express, React, Vite, Tailwind CSS, i18next, Zod, and the rest of the open-source dependency tree</td><td>See <code class="inline">package.json</code>/<code class="inline">package-lock.json</code> in every workspace for the complete, versioned list</td></tr>
+</tbody>
+</table>
+<h2>Appendix C — Group "Angry Nerds"</h2>
+<p>Full roster and per-member contributions are recorded in "Group Information" at the front of this document.</p>
+</section>
+
+</body>
+</html>
