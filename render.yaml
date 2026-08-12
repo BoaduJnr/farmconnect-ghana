@@ -12,7 +12,7 @@ services:
     plan: free
     region: oregon
     buildCommand: >
-      npm install --include=dev &&
+      npm install --include=dev --workspaces --include-workspace-root &&
       npm run build -w @farmconnect/shared &&
       npx prisma generate --schema=apps/api/prisma/schema.prisma &&
       npx prisma migrate deploy --schema=apps/api/prisma/schema.prisma &&
