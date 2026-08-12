@@ -28,7 +28,19 @@ function otpRateLimitKey(phone: string) {
   return `otp:rl:${phone}`;
 }
 
-function generateCode(): string {
+// Reserved for academic evaluation: this exact number is seeded as an ADMIN account
+// (see prisma/seed.ts) and always gets this fixed code instead of a random one, so it can
+// be written directly into the submitted documentation (README / Links.txt) as a literal,
+// reusable credential — no live API response to inspect, no SMS gateway required. Documented
+// in Deployment_Guide.pdf / README.pdf. Not a general auth bypass: every other number still
+// gets a random, single-use, TTL'd code exactly as before.
+const EXAMINER_TEST_PHONE = '+233200000001';
+const EXAMINER_TEST_CODE = '123456';
+
+function generateCode(phone: string): string {
+  if (phone === EXAMINER_TEST_PHONE) {
+    return EXAMINER_TEST_CODE;
+  }
   return Math.floor(100000 + Math.random() * 900000).toString();
 }
 
@@ -47,7 +59,7 @@ export async function requestOtp(phone: string): Promise<{ code: string }> {
     throw new OtpRateLimitError();
   }
 
-  const code = generateCode();
+  const code = generateCode(phone);
   const hash = await bcrypt.hash(code, 10);
   await redis.set(otpKey(phone), hash, 'EX', env.OTP_TTL_SECONDS);
 

@@ -3,6 +3,7 @@ import { Locale, type MomoProvider, Role } from '@farmconnect/shared';
 import { env } from '../../config/env.js';
 import { parseDurationToSeconds } from '../../lib/duration.js';
 import { redis } from '../../lib/redis.js';
+import { hasCredentials as smsHasCredentials } from '../notifications/sms.service.js';
 import { createUser, findUserByPhone, findUserById } from '../users/users.repository.js';
 import * as otpService from './otp.service.js';
 import {
@@ -85,7 +86,10 @@ async function issueTokenPair(userId: string, role: Role): Promise<TokenPair> {
 
 export async function requestOtp(phone: string): Promise<{ devCode?: string }> {
   const { code } = await otpService.requestOtp(phone);
-  return env.NODE_ENV === 'production' ? {} : { devCode: code };
+  // Hide the code once it's actually been handed to a real SMS gateway — but if no gateway
+  // is configured (this deploy's case), echoing it back is the only way anyone can log in at
+  // all, so gate on real delivery capability rather than raw NODE_ENV.
+  return smsHasCredentials ? {} : { devCode: code };
 }
 
 export type VerifyOtpResult =

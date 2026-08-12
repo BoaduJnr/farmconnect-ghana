@@ -7,7 +7,11 @@ const GIANTSMS_SEND_URL = 'https://api.giantsms.com/api/v1/send';
 // trigger a real GiantSMS send to a fake phone number — wasting credits and, worse, throwing
 // on a rejected/invalid number and breaking every test that registers a user. Tests always get
 // the dev-fallback path, regardless of what's configured in .env.
-const hasCredentials =
+// Exported so auth.service can decide whether to echo the OTP back in the API response
+// (devCode): that's only safe to hide once we've actually handed the code to a real SMS
+// gateway — gating it on NODE_ENV alone would silently strand every user on a production
+// deployment that (like this capstone's free-tier deploy) has no funded SMS credentials.
+export const hasCredentials =
   env.NODE_ENV !== 'test' && Boolean(env.GIANTSMS_API_TOKEN && env.GIANTSMS_SENDER_ID);
 
 interface GiantSmsResponse {
