@@ -31,11 +31,11 @@ services:
       - key: CORS_ORIGIN
         sync: false
       - key: JWT_SECRET
-        generateValue: true
+        sync: false
       - key: JWT_EXPIRES_IN
         value: 12h
       - key: JWT_REFRESH_SECRET
-        generateValue: true
+        sync: false
       - key: JWT_REFRESH_EXPIRES_IN
         value: 30d
       - key: OTP_TTL_SECONDS
