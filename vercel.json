@@ -1,7 +1,7 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "npm run build -w @farmconnect/shared && npm run build -w @farmconnect/web",
-  "installCommand": "npm install --include=dev --workspaces --include-workspace-root",
+  "installCommand": "npm ci --include=dev",
   "outputDirectory": "apps/web/dist",
   "rewrites": [
     { "source": "/((?!.*\\.[a-zA-Z0-9]+$).*)", "destination": "/index.html" }
