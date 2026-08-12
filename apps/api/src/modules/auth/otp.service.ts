@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import { env } from '../../config/env.js';
+import { logger } from '../../lib/logger.js';
 import { redis } from '../../lib/redis.js';
 import { sendSms } from '../notifications/sms.service.js';
 
@@ -63,7 +64,15 @@ export async function requestOtp(phone: string): Promise<{ code: string }> {
   const hash = await bcrypt.hash(code, 10);
   await redis.set(otpKey(phone), hash, 'EX', env.OTP_TTL_SECONDS);
 
-  await sendSms(phone, `Your FarmConnect Ghana verification code is ${code}. It expires in 5 minutes.`);
+  // EXAMINER_TEST_PHONE is synthetic — nobody holds it, so a real SMS gateway would either
+  // waste a credit sending into the void or hard-reject it as an invalid/unassigned number
+  // (breaking this login path entirely once a gateway is actually configured, as happened
+  // here). The code is already fixed and documented, so there is nothing to deliver.
+  if (phone === EXAMINER_TEST_PHONE) {
+    logger.info(`[examiner test number] skipping real SMS send to ${phone} (fixed code)`);
+  } else {
+    await sendSms(phone, `Your FarmConnect Ghana verification code is ${code}. It expires in 5 minutes.`);
+  }
 
   return { code };
 }
