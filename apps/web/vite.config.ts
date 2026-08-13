@@ -9,6 +9,13 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
+      // The default injected registerSW.js is just a bare navigator.serviceWorker.register()
+      // call -- it detects and activates a new service worker in the background (skipWaiting/
+      // clientsClaim, from registerType: 'autoUpdate' above), but never reloads the page that's
+      // already open, so a running session keeps executing the OLD JS until the user manually
+      // reloads. main.tsx registers explicitly via virtual:pwa-register instead, so a deploy
+      // reaches already-open tabs without that manual step.
+      injectRegister: false,
       manifest: {
         name: 'FarmConnect Ghana',
         short_name: 'FarmConnect',
