@@ -68,6 +68,7 @@
 <div class="step"><div class="n">3</div><div class="t">First time only: choose <strong>Farmer</strong> or <strong>Buyer</strong>. This cannot be changed later from inside the app — contact an administrator if you picked the wrong one.</div></div>
 <div class="step"><div class="n">4</div><div class="t">You're in. Returning users just repeat steps 1–2 — the app remembers your role.</div></div>
 <div class="callout note"><span class="label">No password, ever</span>FarmConnect never asks for a password — only your phone number and the one-time code sent to it. If anything on-screen asks you for a password, it is not part of FarmConnect.</div>
+<div class="callout note"><span class="label">For examiners / this deployment specifically</span>No SMS gateway is funded on this free-tier deployment, so the code is returned directly in the "OTP sent" response instead of being texted — read it straight off screen. The reserved account <code class="inline">0200000001</code> always uses the fixed code <code class="inline">123456</code> and is already seeded as Administrator; see README.pdf / Links.txt.</div>
 </section>
 
 <section class="section" id="u2">
