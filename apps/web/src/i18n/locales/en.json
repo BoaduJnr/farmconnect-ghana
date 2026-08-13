@@ -21,6 +21,7 @@
   "farmerDesc": "Sell your produce directly to buyers",
   "buyer": "Buyer",
   "buyerDesc": "Buy fresh produce from local farmers",
+  "admin": "Administrator",
   "greeting": "Akwaaba",
   "statListings": "Active Listings",
   "statOrders": "Pending Orders",

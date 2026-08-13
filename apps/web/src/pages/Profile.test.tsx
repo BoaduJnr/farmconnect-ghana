@@ -46,10 +46,37 @@ describe('Profile', () => {
     vi.unstubAllGlobals();
   });
 
-  it('shows the logged-in farmer role and a healthy API status', async () => {
+  it('shows the logged-in farmer role, with no System Status section (admin-only)', async () => {
     renderProfile();
 
     expect(screen.getByText('Farmer')).toBeInTheDocument();
+    expect(screen.queryByText('System status')).not.toBeInTheDocument();
+    // Give any stray effect a tick to run, then confirm it still never appeared.
+    await waitFor(() => expect(screen.getByText('Mobile Money payout details')).toBeInTheDocument());
+    expect(screen.queryByText('API connected')).not.toBeInTheDocument();
+  });
+
+  it('shows System Status for an admin, labeled correctly (not "Buyer")', async () => {
+    useAuthStore.getState().setSession({
+      user: {
+        id: 'admin_1',
+        phone: '+233200000001',
+        role: Role.ADMIN,
+        name: 'Examiner Admin',
+        locale: 'en',
+        isVerified: true,
+        momoProvider: null,
+        momoPhone: null,
+        momoAccountName: null,
+      },
+      accessToken: 'access',
+      refreshToken: 'refresh',
+    });
+
+    renderProfile();
+
+    expect(screen.getByText('Administrator')).toBeInTheDocument();
+    expect(screen.queryByText('Buyer')).not.toBeInTheDocument();
     await waitFor(() => expect(screen.getByText('API connected')).toBeInTheDocument());
   });
 

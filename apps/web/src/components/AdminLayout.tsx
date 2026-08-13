@@ -8,6 +8,7 @@ const TABS = [
   { label: 'Users', path: '/admin/users' },
   { label: 'Listings', path: '/admin/listings' },
   { label: 'Disputes', path: '/admin/disputes' },
+  { label: 'Profile', path: '/profile' },
 ];
 
 export function AdminLayout({ children }: Readonly<{ children: ReactNode }>) {

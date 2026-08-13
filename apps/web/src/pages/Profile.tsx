@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { Locale, Role } from '@farmconnect/shared';
+import { AdminLayout } from '../components/AdminLayout';
 import { AppShell } from '../components/AppShell';
 import { CoopManager } from '../components/CoopManager';
 import { MomoSetup } from '../components/MomoSetup';
@@ -19,10 +20,15 @@ export default function Profile() {
   const [health, setHealth] = useState<HealthState>({ kind: 'loading' });
 
   useEffect(() => {
+    // System status is admin-only (see below) -- skip the network call entirely for
+    // farmer/buyer, who can never see its result.
+    if (user?.role !== Role.ADMIN) {
+      return;
+    }
     fetchHealth()
       .then((data) => setHealth({ kind: 'ok', data }))
       .catch(() => setHealth({ kind: 'error' }));
-  }, []);
+  }, [user?.role]);
 
   async function handleLogout() {
     if (refreshToken) {
@@ -32,15 +38,19 @@ export default function Profile() {
     navigate('/', { replace: true });
   }
 
+  const Shell = user?.role === Role.ADMIN ? AdminLayout : AppShell;
+  const roleEmoji = user?.role === Role.FARMER ? '🧑🏾‍🌾' : user?.role === Role.ADMIN ? '🛡️' : '🛒';
+  const roleLabel = user?.role === Role.FARMER ? t('farmer') : user?.role === Role.ADMIN ? t('admin') : t('buyer');
+
   return (
-    <AppShell>
+    <Shell>
       <div className="rounded-b-[26px] bg-gradient-to-br from-brand to-brand-dark px-[22px] pb-[30px] pt-[54px] text-center text-white">
         <div className="mx-auto mb-3.5 flex h-20 w-20 items-center justify-center rounded-full bg-white/18 text-4xl">
-          {user?.role === Role.FARMER ? '🧑🏾‍🌾' : '🛒'}
+          {roleEmoji}
         </div>
         <div className="text-xl font-extrabold">{user?.name ?? `+233 ${user?.phone.replace('+233', '')}`}</div>
         <div className="mt-3 inline-block rounded-full bg-white/16 px-3.5 py-1.5 text-xs font-bold">
-          {user?.role === Role.FARMER ? t('farmer') : t('buyer')}
+          {roleLabel}
         </div>
       </div>
 
@@ -88,35 +98,37 @@ export default function Profile() {
           </div>
         )}
 
-        <div className="mb-6 rounded-2xl border border-brand-surface bg-white p-4 shadow-sm">
-          <div className="mb-2 text-sm font-bold text-ink">{t('healthCheckTitle')}</div>
-          {health.kind === 'loading' && <div className="text-sm text-muted">…</div>}
-          {health.kind === 'error' && (
-            <div className="text-sm font-semibold text-red-600">{t('healthCheckFail')}</div>
-          )}
-          {health.kind === 'ok' && (
-            <div className="flex flex-col gap-1 text-sm">
-              <div
-                className={
-                  health.data.status === 'ok' ? 'font-semibold text-brand' : 'font-semibold text-amber-600'
-                }
-              >
-                {health.data.status === 'ok' ? t('healthCheckOk') : t('healthCheckFail')}
+        {user?.role === Role.ADMIN && (
+          <div className="mb-6 rounded-2xl border border-brand-surface bg-white p-4 shadow-sm">
+            <div className="mb-2 text-sm font-bold text-ink">{t('healthCheckTitle')}</div>
+            {health.kind === 'loading' && <div className="text-sm text-muted">…</div>}
+            {health.kind === 'error' && (
+              <div className="text-sm font-semibold text-red-600">{t('healthCheckFail')}</div>
+            )}
+            {health.kind === 'ok' && (
+              <div className="flex flex-col gap-1 text-sm">
+                <div
+                  className={
+                    health.data.status === 'ok' ? 'font-semibold text-brand' : 'font-semibold text-amber-600'
+                  }
+                >
+                  {health.data.status === 'ok' ? t('healthCheckOk') : t('healthCheckFail')}
+                </div>
+                <div className="text-muted">
+                  {t('postgresLabel')}: {health.data.db ? '✔' : '✘'}
+                </div>
+                <div className="text-muted">
+                  {t('redisLabel')}: {health.data.redis ? '✔' : '✘'}
+                </div>
               </div>
-              <div className="text-muted">
-                {t('postgresLabel')}: {health.data.db ? '✔' : '✘'}
-              </div>
-              <div className="text-muted">
-                {t('redisLabel')}: {health.data.redis ? '✔' : '✘'}
-              </div>
-            </div>
-          )}
-        </div>
+            )}
+          </div>
+        )}
 
         <PrimaryButton variant="ghost" onClick={handleLogout}>
           {t('logout')}
         </PrimaryButton>
       </div>
-    </AppShell>
+    </Shell>
   );
 }
