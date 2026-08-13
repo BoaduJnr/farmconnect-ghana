@@ -35,7 +35,7 @@ export function AdminLayout({ children }: Readonly<{ children: ReactNode }>) {
             Log out
           </button>
         </div>
-        <div className="flex gap-1.5 pb-3">
+        <div className="fc-scroll flex gap-1.5 overflow-x-auto pb-3">
           {TABS.map((tab) => {
             // startsWith, not exact match -- Support has a nested thread route
             // (/admin/support/:userId) that should still highlight the Support tab.
@@ -44,7 +44,7 @@ export function AdminLayout({ children }: Readonly<{ children: ReactNode }>) {
               <button
                 key={tab.path}
                 onClick={() => navigate(tab.path)}
-                className="rounded-full px-3.5 py-2 text-[13px] font-bold"
+                className="flex-none rounded-full px-3.5 py-2 text-[13px] font-bold"
                 style={{
                   background: active ? '#1B7A3D' : '#F4F7F2',
                   color: active ? '#fff' : '#5C6B61',
