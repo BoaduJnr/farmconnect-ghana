@@ -89,7 +89,7 @@ export default function AdminCrops() {
             onChange={(e) => setForm((f) => ({ ...f, labelEn: e.target.value }))}
             placeholder="English name (e.g. Durian)"
             aria-label="English name"
-            className="h-11 flex-1 rounded-xl border border-[#E1E8DE] px-3 text-[13.5px] outline-none focus:border-brand"
+            className="h-11 min-w-0 flex-1 rounded-xl border border-[#E1E8DE] px-3 text-[13.5px] outline-none focus:border-brand"
           />
         </div>
         <div className="mb-2.5 flex gap-2">
@@ -98,7 +98,7 @@ export default function AdminCrops() {
             onChange={(e) => setForm((f) => ({ ...f, labelTw: e.target.value }))}
             placeholder="Twi name"
             aria-label="Twi name"
-            className="h-11 flex-1 rounded-xl border border-[#E1E8DE] px-3 text-[13.5px] outline-none focus:border-brand"
+            className="h-11 min-w-0 flex-1 rounded-xl border border-[#E1E8DE] px-3 text-[13.5px] outline-none focus:border-brand"
           />
           <select
             value={form.category}
@@ -120,14 +120,14 @@ export default function AdminCrops() {
             placeholder="Starting price, GH₵/kg"
             aria-label="Starting price per kg"
             inputMode="decimal"
-            className="h-11 flex-1 rounded-xl border border-[#E1E8DE] px-3 text-[13.5px] outline-none focus:border-brand"
+            className="h-11 min-w-0 flex-1 rounded-xl border border-[#E1E8DE] px-3 text-[13.5px] outline-none focus:border-brand"
           />
           <input
             value={form.key}
             onChange={(e) => setForm((f) => ({ ...f, key: e.target.value.toLowerCase() }))}
-            placeholder="Key (optional — auto from name)"
+            placeholder="Key (optional)"
             aria-label="Key (optional)"
-            className="h-11 flex-1 rounded-xl border border-[#E1E8DE] px-3 text-[13.5px] outline-none focus:border-brand"
+            className="h-11 min-w-0 flex-1 rounded-xl border border-[#E1E8DE] px-3 text-[13.5px] outline-none focus:border-brand"
           />
         </div>
         {formError && <div className="mb-2 text-[12px] font-semibold text-[#C0413A]">{formError}</div>}
