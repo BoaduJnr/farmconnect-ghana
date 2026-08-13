@@ -10,6 +10,7 @@ import * as listingsRepository from '../listings/listings.repository.js';
 import * as notificationsService from '../notifications/notifications.service.js';
 import * as ordersRepository from '../orders/orders.repository.js';
 import * as ordersService from '../orders/orders.service.js';
+import * as supportService from '../support/support.service.js';
 import * as usersRepository from '../users/users.repository.js';
 
 function serializeUser(user: {
@@ -156,4 +157,16 @@ export async function createCrop(input: CreateCropInput) {
 
 export async function setCropActive(key: string, isActive: boolean) {
   return cropsService.setActive(key, isActive);
+}
+
+export async function listSupportInbox() {
+  return supportService.listInboxForAdmin();
+}
+
+export async function getSupportThread(userId: string) {
+  return supportService.getThreadForAdmin(userId);
+}
+
+export async function sendSupportReply(adminId: string, userId: string, content: string) {
+  return supportService.sendAsAdmin(adminId, userId, content);
 }

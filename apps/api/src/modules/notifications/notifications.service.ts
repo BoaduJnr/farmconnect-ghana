@@ -19,7 +19,7 @@ export async function markRead(id: string, userId: string) {
 export async function notify(params: {
   userId: string;
   phone?: string;
-  type: 'ORDER' | 'PRICE' | 'SYSTEM';
+  type: 'ORDER' | 'PRICE' | 'SYSTEM' | 'SUPPORT';
   title: string;
   body: string;
   sms?: boolean;

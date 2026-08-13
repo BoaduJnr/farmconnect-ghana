@@ -125,6 +125,16 @@ export default function Profile() {
           </div>
         )}
 
+        {user?.role !== Role.ADMIN && (
+          <button
+            type="button"
+            onClick={() => navigate('/support')}
+            className="mb-3.5 flex h-12 w-full items-center justify-center gap-2 rounded-2xl border-[1.5px] border-brand-surface bg-white text-[14px] font-bold text-brand"
+          >
+            💬 {t('contactSupport')}
+          </button>
+        )}
+
         <PrimaryButton variant="ghost" onClick={handleLogout}>
           {t('logout')}
         </PrimaryButton>

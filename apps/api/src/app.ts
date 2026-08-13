@@ -18,6 +18,7 @@ import { ordersRouter } from './modules/orders/orders.routes.js';
 import { pricesRouter } from './modules/prices/prices.routes.js';
 import { ratingsRouter } from './modules/ratings/ratings.routes.js';
 import { smsGatewayRouter } from './modules/sms-gateway/sms-gateway.routes.js';
+import { supportRouter } from './modules/support/support.routes.js';
 import { uploadsRouter } from './modules/uploads/uploads.routes.js';
 import { usersRouter } from './modules/users/users.routes.js';
 import { UPLOADS_DIR } from './lib/uploadsDir.js';
@@ -65,6 +66,7 @@ export function createApp() {
   app.use('/api/prices', pricesRouter);
   app.use('/api/ratings', ratingsRouter);
   app.use('/api/sms', smsGatewayRouter);
+  app.use('/api/support', supportRouter);
   app.use('/api/uploads', uploadsRouter);
   app.use('/api/users', usersRouter);
 

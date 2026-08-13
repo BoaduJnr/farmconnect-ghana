@@ -61,6 +61,7 @@ model User {
   ordersAsFarmer  Order[]        @relation("OrdersAsFarmer")
   chatMessages    ChatMessage[]
   notifications   Notification[]
+  supportMessages SupportMessage[]
   ratingsGiven    Rating[]       @relation("RatingsGiven")
   ratingsReceived Rating[]       @relation("RatingsReceived")
   coopMembership  CoopMember?
@@ -281,10 +282,39 @@ model PriceSnapshot {
   @@map("price_snapshots")
 }
 
+enum SupportSender {
+  USER
+  ADMIN
+}
+
+// Two-way messaging between a user (farmer/buyer) and "the admin team" collectively — any
+// admin can read/reply to any thread, matching how admin actions elsewhere in this app aren't
+// attributed to a specific admin beyond the actor calling the API (adminId is kept purely for
+// accountability, not access control). One thread per user. `orderId` optionally tags a
+// message with the transaction it's about (loose reference, not a FK, matching cropType
+// elsewhere in this schema) — this is what the "complain to admin" chat icon on an order uses,
+// so an admin reviewing the thread knows which transaction a complaint refers to.
+model SupportMessage {
+  id          String        @id @default(cuid())
+  user        User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId      String
+  sender      SupportSender
+  adminId     String?
+  content     String
+  orderId     String?
+  readByAdmin Boolean       @default(false)
+  readByUser  Boolean       @default(false)
+  createdAt   DateTime      @default(now())
+
+  @@index([userId, createdAt])
+  @@map("support_messages")
+}
+
 enum NotificationType {
   ORDER
   PRICE
   SYSTEM
+  SUPPORT
 }
 
 enum NotificationChannel {

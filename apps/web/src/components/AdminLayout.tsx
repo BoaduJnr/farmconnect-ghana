@@ -9,6 +9,7 @@ const TABS = [
   { label: 'Listings', path: '/admin/listings' },
   { label: 'Disputes', path: '/admin/disputes' },
   { label: 'Crops', path: '/admin/crops' },
+  { label: 'Support', path: '/admin/support' },
   { label: 'Profile', path: '/profile' },
 ];
 
@@ -36,7 +37,9 @@ export function AdminLayout({ children }: Readonly<{ children: ReactNode }>) {
         </div>
         <div className="flex gap-1.5 pb-3">
           {TABS.map((tab) => {
-            const active = location.pathname === tab.path;
+            // startsWith, not exact match -- Support has a nested thread route
+            // (/admin/support/:userId) that should still highlight the Support tab.
+            const active = location.pathname.startsWith(tab.path);
             return (
               <button
                 key={tab.path}

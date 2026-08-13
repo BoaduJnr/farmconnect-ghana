@@ -4,6 +4,8 @@ import { Role } from '@farmconnect/shared';
 import AdminCrops from './pages/admin/Crops';
 import AdminDisputes from './pages/admin/Disputes';
 import AdminListings from './pages/admin/Listings';
+import AdminSupport from './pages/admin/Support';
+import AdminSupportThread from './pages/admin/SupportThread';
 import AdminUsers from './pages/admin/Users';
 import Advisory from './pages/Advisory';
 import CreateListing from './pages/farmer/CreateListing';
@@ -22,6 +24,7 @@ import Otp from './pages/Otp';
 import Prices from './pages/Prices';
 import Profile from './pages/Profile';
 import RoleSelect from './pages/RoleSelect';
+import Support from './pages/Support';
 import { hasMomoSetup, roleHomePath } from './lib/roleHome';
 import { useAuthStore } from './store/authStore';
 
@@ -199,6 +202,14 @@ export const router = createBrowserRouter([
     ),
   },
   {
+    path: '/support',
+    element: (
+      <RequireAuth>
+        <Support />
+      </RequireAuth>
+    ),
+  },
+  {
     path: '/admin/users',
     element: (
       <RequireRole role={Role.ADMIN}>
@@ -227,6 +238,22 @@ export const router = createBrowserRouter([
     element: (
       <RequireRole role={Role.ADMIN}>
         <AdminCrops />
+      </RequireRole>
+    ),
+  },
+  {
+    path: '/admin/support',
+    element: (
+      <RequireRole role={Role.ADMIN}>
+        <AdminSupport />
+      </RequireRole>
+    ),
+  },
+  {
+    path: '/admin/support/:userId',
+    element: (
+      <RequireRole role={Role.ADMIN}>
+        <AdminSupportThread />
       </RequireRole>
     ),
   },

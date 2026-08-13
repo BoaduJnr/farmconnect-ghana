@@ -5,6 +5,7 @@ import type {
   AdminSetListingStatusInput,
   CreateCropInput,
   ResolveDisputeInput,
+  SendSupportMessageInput,
   SetCropActiveInput,
   SetSuspendedInput,
   SetVerifiedInput,
@@ -97,4 +98,20 @@ export async function setCropActive(req: Request, res: Response) {
   } catch (err) {
     if (!handleKnownErrors(err, res)) throw err;
   }
+}
+
+export async function listSupportInbox(_req: Request, res: Response) {
+  const inbox = await adminService.listSupportInbox();
+  res.status(200).json({ inbox });
+}
+
+export async function getSupportThread(req: Request, res: Response) {
+  const messages = await adminService.getSupportThread(req.params.userId);
+  res.status(200).json({ messages });
+}
+
+export async function sendSupportReply(req: Request, res: Response) {
+  const { content } = req.body as SendSupportMessageInput;
+  const message = await adminService.sendSupportReply(req.user!.id, req.params.userId, content);
+  res.status(201).json({ message });
 }

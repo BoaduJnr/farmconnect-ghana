@@ -85,6 +85,15 @@ export function OrderCard({ order, role }: Readonly<OrderCardProps>) {
             {order.quantityKg} kg · ₵{order.total.toFixed(2)}
           </div>
         </div>
+        <button
+          type="button"
+          onClick={() => navigate(`/support?orderId=${order.id}`)}
+          aria-label={t('supportChatAria')}
+          title={t('supportChatAria')}
+          className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-brand-surface text-base"
+        >
+          💬
+        </button>
         <OrderStatusBadge status={order.status} />
       </div>
 

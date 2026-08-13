@@ -6,6 +6,7 @@ import {
   createCropSchema,
   resolveDisputeSchema,
   Role,
+  sendSupportMessageSchema,
   setCropActiveSchema,
   setSuspendedSchema,
   setVerifiedSchema,
@@ -56,4 +57,12 @@ adminRouter.post(
   '/crops/:key/status',
   validateBody(setCropActiveSchema),
   asyncHandler(adminController.setCropActive),
+);
+
+adminRouter.get('/support', asyncHandler(adminController.listSupportInbox));
+adminRouter.get('/support/:userId', asyncHandler(adminController.getSupportThread));
+adminRouter.post(
+  '/support/:userId',
+  validateBody(sendSupportMessageSchema),
+  asyncHandler(adminController.sendSupportReply),
 );

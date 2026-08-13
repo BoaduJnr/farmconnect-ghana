@@ -1,6 +1,11 @@
 import { prisma } from '../../lib/prisma.js';
 
-export function create(userId: string, type: 'ORDER' | 'PRICE' | 'SYSTEM', title: string, body: string) {
+export function create(
+  userId: string,
+  type: 'ORDER' | 'PRICE' | 'SYSTEM' | 'SUPPORT',
+  title: string,
+  body: string,
+) {
   return prisma.notification.create({ data: { userId, type, title, body } });
 }
 
