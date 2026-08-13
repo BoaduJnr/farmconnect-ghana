@@ -20,13 +20,18 @@ interface MomoSetupProps {
 }
 
 /** Lets a farmer link the Mobile Money number/network/account-name buyers pay directly —
- * required before they can publish a listing (no payment gateway, see plan). */
+ * required before they can publish a listing (no payment gateway, see plan). Pre-fills from
+ * whatever is already saved on the user (all null on first-time/forced setup, so the fields
+ * fall back to sensible blanks there) so revisiting Profile doesn't show a misleadingly blank
+ * form for a farmer who already linked MoMo. */
 export function MomoSetup({ onSaved }: Readonly<MomoSetupProps>) {
   const { t } = useTranslation();
-  const updateUser = useAuthStore((s) => s.updateUser);
-  const [provider, setProvider] = useState<MomoProvider>(MomoProvider.MTN);
-  const [phone, setPhone] = useState('');
-  const [accountName, setAccountName] = useState('');
+  const { user, updateUser } = useAuthStore();
+  const [provider, setProvider] = useState<MomoProvider>(user?.momoProvider ?? MomoProvider.MTN);
+  // Stored/displayed everywhere else as E.164 (+233...); PhoneInput shows its own fixed "+233"
+  // prefix and expects just the local digits, matching what the farmer originally typed.
+  const [phone, setPhone] = useState(user?.momoPhone?.replace(/^\+233/, '') ?? '');
+  const [accountName, setAccountName] = useState(user?.momoAccountName ?? '');
 
   const mutation = useMutation({
     mutationFn: () =>
