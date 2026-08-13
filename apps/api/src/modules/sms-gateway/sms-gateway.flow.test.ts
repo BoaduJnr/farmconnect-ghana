@@ -3,6 +3,8 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Role } from '@farmconnect/shared';
 import { createApp } from '../../app.js';
 import { prisma } from '../../lib/prisma.js';
+import { ensureSeeded as ensureCropsSeeded } from '../crops/crops.service.js';
+import { ensureSeeded as ensurePricesSeeded } from '../prices/prices.service.js';
 import { uniqueTestPhone } from '../../test-utils/phone.js';
 
 const app = createApp();
@@ -30,6 +32,11 @@ describe('sms gateway flow (integration, real Postgres + Redis)', () => {
   let buyerToken: string;
 
   beforeAll(async () => {
+    // Seeded explicitly here rather than relying on prices.flow.test.ts happening to run
+    // first in the same shared test DB — this file's PRICE-command test needs real crop +
+    // price rows to exist regardless of test execution order.
+    await ensureCropsSeeded();
+    await ensurePricesSeeded();
     buyerToken = await registerAndLoginViaApp(buyerLocalPhone, Role.BUYER);
   });
 

@@ -1,4 +1,11 @@
-import type { AdminSetListingStatusInput, DisputeResolution, ListingStatus, Role } from '@farmconnect/shared';
+import type {
+  AdminSetListingStatusInput,
+  CreateCropInput,
+  DisputeResolution,
+  ListingStatus,
+  Role,
+} from '@farmconnect/shared';
+import * as cropsService from '../crops/crops.service.js';
 import * as listingsRepository from '../listings/listings.repository.js';
 import * as notificationsService from '../notifications/notifications.service.js';
 import * as ordersRepository from '../orders/orders.repository.js';
@@ -137,4 +144,16 @@ export async function listDisputedOrders() {
 
 export async function resolveDispute(orderId: string, resolution: DisputeResolution, note?: string) {
   return ordersService.resolveDispute(orderId, resolution, note);
+}
+
+export async function listCrops() {
+  return cropsService.listAll();
+}
+
+export async function createCrop(input: CreateCropInput) {
+  return cropsService.create(input);
+}
+
+export async function setCropActive(key: string, isActive: boolean) {
+  return cropsService.setActive(key, isActive);
 }

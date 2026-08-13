@@ -8,6 +8,7 @@ const TABS = [
   { label: 'Users', path: '/admin/users' },
   { label: 'Listings', path: '/admin/listings' },
   { label: 'Disputes', path: '/admin/disputes' },
+  { label: 'Crops', path: '/admin/crops' },
   { label: 'Profile', path: '/profile' },
 ];
 

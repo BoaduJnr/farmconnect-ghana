@@ -3,8 +3,10 @@ import {
   adminListListingsQuerySchema,
   adminListUsersQuerySchema,
   adminSetListingStatusSchema,
+  createCropSchema,
   resolveDisputeSchema,
   Role,
+  setCropActiveSchema,
   setSuspendedSchema,
   setVerifiedSchema,
 } from '@farmconnect/shared';
@@ -46,4 +48,12 @@ adminRouter.post(
   '/orders/:id/resolve-dispute',
   validateBody(resolveDisputeSchema),
   asyncHandler(adminController.resolveDispute),
+);
+
+adminRouter.get('/crops', asyncHandler(adminController.listCrops));
+adminRouter.post('/crops', validateBody(createCropSchema), asyncHandler(adminController.createCrop));
+adminRouter.post(
+  '/crops/:key/status',
+  validateBody(setCropActiveSchema),
+  asyncHandler(adminController.setCropActive),
 );

@@ -1,5 +1,7 @@
-import { CROPS, type CropType, Locale, MomoProvider, Role } from '@farmconnect/shared';
+import type { CropType } from '@farmconnect/shared';
+import { Locale, MomoProvider, Role } from '@farmconnect/shared';
 import { findRegionCoords } from '../../lib/ghanaRegions.js';
+import * as cropsService from '../crops/crops.service.js';
 import * as listingsService from '../listings/listings.service.js';
 import * as ordersService from '../orders/orders.service.js';
 import * as pricesService from '../prices/prices.service.js';
@@ -106,7 +108,8 @@ async function handleList(from: string, args: string[]): Promise<string> {
   const region = regionParts.join(' ');
   const cropType = cropRaw?.toLowerCase() as CropType;
 
-  if (!cropType || !(cropType in CROPS) || !qtyRaw || !priceRaw || !region) {
+  const activeCropKeys = await cropsService.listActiveKeys();
+  if (!cropType || !activeCropKeys.has(cropType) || !qtyRaw || !priceRaw || !region) {
     return 'Usage: LIST <crop> <qtyKg> <priceKg> <region>, e.g. LIST maize 200 4.50 Kumasi';
   }
 
@@ -137,7 +140,8 @@ async function handleList(from: string, args: string[]): Promise<string> {
 
 async function handlePrice(args: string[]): Promise<string> {
   const cropType = args[0]?.toLowerCase() as CropType;
-  if (!cropType || !(cropType in CROPS)) {
+  const activeCropKeys = await cropsService.listActiveKeys();
+  if (!cropType || !activeCropKeys.has(cropType)) {
     return 'Usage: PRICE <crop>, e.g. PRICE maize';
   }
   const prices = await pricesService.getLatestPrices();

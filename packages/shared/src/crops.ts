@@ -1,44 +1,36 @@
 import { z } from 'zod';
 
-export const CROP_CATEGORY_KEYS = ['grains', 'veg', 'fruits', 'tubers'] as const;
+export const CROP_CATEGORY_KEYS = [
+  'grains',
+  'legumes',
+  'tubers',
+  'veg',
+  'leafygreens',
+  'fruits',
+  'cashcrops',
+] as const;
 export const cropCategorySchema = z.enum(CROP_CATEGORY_KEYS);
 export type CropCategory = z.infer<typeof cropCategorySchema>;
 
-const CROP_KEYS = [
-  'maize',
-  'rice',
-  'tomatoes',
-  'pepper',
-  'onions',
-  'yam',
-  'cassava',
-  'plantain',
-  'soybean',
-  'cocoa',
-] as const;
+// CropType used to be a fixed union backed by a hardcoded 10-crop Zod enum. Crops now live in
+// the database (see apps/api/src/modules/crops) so an admin can add more without a redeploy --
+// this is just a plain string now; validity is checked at runtime against the Crop table
+// (crops.service.ts) rather than at parse time. createListingSchema.cropType below reflects
+// this: it accepts any non-empty string, and listings.service.ts rejects an unknown key.
+export type CropType = string;
 
-export const cropTypeSchema = z.enum(CROP_KEYS);
-export type CropType = z.infer<typeof cropTypeSchema>;
-
-interface CropMeta {
+/** Shape returned by GET /api/crops and embedded in listing/price API responses. */
+export interface CropMeta {
+  key: string;
   emoji: string;
   category: CropCategory;
-  en: string;
-  tw: string;
+  labelEn: string;
+  labelTw: string;
+  isActive: boolean;
 }
 
-/** Single source of truth for crop metadata — reused by the shared zod schema, the API's
- * category filter, and the web app's display labels/emoji (originally lifted from the
- * Figma Make prototype's cropMeta/crops tables). */
-export const CROPS: Record<CropType, CropMeta> = {
-  maize: { emoji: '🌽', category: 'grains', en: 'Maize', tw: 'Aburoo' },
-  rice: { emoji: '🌾', category: 'grains', en: 'Rice', tw: 'Ɛmo' },
-  soybean: { emoji: '🫘', category: 'grains', en: 'Soybean', tw: 'Soya' },
-  cocoa: { emoji: '🫛', category: 'grains', en: 'Cocoa', tw: 'Kookoɔ' },
-  tomatoes: { emoji: '🍅', category: 'veg', en: 'Tomatoes', tw: 'Ntoosi' },
-  pepper: { emoji: '🌶️', category: 'veg', en: 'Pepper', tw: 'Mako' },
-  onions: { emoji: '🧅', category: 'veg', en: 'Onions', tw: 'Gyeene' },
-  yam: { emoji: '🍠', category: 'tubers', en: 'Yam', tw: 'Bayerɛ' },
-  cassava: { emoji: '🥔', category: 'tubers', en: 'Cassava', tw: 'Bankye' },
-  plantain: { emoji: '🍌', category: 'fruits', en: 'Plantain', tw: 'Brɔdeɛ' },
-};
+export const cropKeySchema = z
+  .string()
+  .min(2)
+  .max(30)
+  .regex(/^[a-z][a-z0-9]*(_[a-z0-9]+)*$/, 'lowercase letters, numbers, and underscores only');

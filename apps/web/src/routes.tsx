@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { Navigate, createBrowserRouter } from 'react-router-dom';
 import { Role } from '@farmconnect/shared';
+import AdminCrops from './pages/admin/Crops';
 import AdminDisputes from './pages/admin/Disputes';
 import AdminListings from './pages/admin/Listings';
 import AdminUsers from './pages/admin/Users';
@@ -218,6 +219,14 @@ export const router = createBrowserRouter([
     element: (
       <RequireRole role={Role.ADMIN}>
         <AdminDisputes />
+      </RequireRole>
+    ),
+  },
+  {
+    path: '/admin/crops',
+    element: (
+      <RequireRole role={Role.ADMIN}>
+        <AdminCrops />
       </RequireRole>
     ),
   },

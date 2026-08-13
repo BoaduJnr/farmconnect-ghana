@@ -1,25 +1,18 @@
-import { CROPS, type CropType } from '@farmconnect/shared';
+import type { CropType } from '@farmconnect/shared';
+import * as cropsService from '../crops/crops.service.js';
 import { logger } from '../../lib/logger.js';
 import * as pricesRepository from './prices.repository.js';
 
-const BASE_PRICES: Record<CropType, number> = {
-  maize: 4.55,
-  rice: 7.1,
-  tomatoes: 8.0,
-  pepper: 12.0,
-  onions: 6.0,
-  yam: 3.3,
-  cassava: 2.05,
-  plantain: 5.4,
-  soybean: 6.4,
-  cocoa: 21.8,
-};
-
+/** Seeds one initial snapshot per crop from its `basePrice` — crops.service.ensureSeeded()
+ * must have already run (see server.ts) so the crop rows themselves exist. Idempotent: only
+ * seeds a crop that has no price history yet, so an admin-added crop gets exactly one seed
+ * snapshot the first time a tick/request touches it, and existing crops are left alone. */
 export async function ensureSeeded() {
-  for (const cropType of Object.keys(BASE_PRICES) as CropType[]) {
-    const existing = await pricesRepository.findLatestByCrop(cropType);
+  const crops = await cropsService.listAll();
+  for (const crop of crops) {
+    const existing = await pricesRepository.findLatestByCrop(crop.key);
     if (!existing) {
-      await pricesRepository.createSnapshot(cropType, BASE_PRICES[cropType]);
+      await pricesRepository.createSnapshot(crop.key, Number(crop.basePrice));
     }
   }
 }
@@ -34,9 +27,12 @@ export interface PriceRow {
 }
 
 export async function getLatestPrices(): Promise<PriceRow[]> {
-  // 10 crops, a handful of ticks per hour — a few hundred rows is a generous recent window
-  // for a capstone-scale dataset, cheap to pull and group in JS.
-  const rows = await pricesRepository.listRecentSnapshots(500);
+  // A few hundred rows is a generous recent window for a capstone-scale dataset (now ~30
+  // crops, a handful of ticks per hour), cheap to pull and group in JS.
+  const [rows, cropsByKey] = await Promise.all([
+    pricesRepository.listRecentSnapshots(1000),
+    cropsService.getByKeyMap(),
+  ]);
 
   const byCrop = new Map<string, typeof rows>();
   for (const row of rows) {
@@ -54,7 +50,7 @@ export async function getLatestPrices(): Promise<PriceRow[]> {
 
     results.push({
       cropType: cropType as CropType,
-      emoji: CROPS[cropType as CropType]?.emoji ?? '🌱',
+      emoji: cropsByKey.get(cropType)?.emoji ?? '🌱',
       price,
       changePct: Math.round(changePct * 10) / 10,
       up: changePct >= 0,
@@ -69,12 +65,13 @@ export async function getLatestPrices(): Promise<PriceRow[]> {
  * feed since no public GCX API actually exists to poll (see plan). Called on an interval
  * from server.ts, never during tests (which only ever call createApp(), not server.ts). */
 export async function runPriceTick() {
-  for (const cropType of Object.keys(BASE_PRICES) as CropType[]) {
-    const latest = await pricesRepository.findLatestByCrop(cropType);
-    const current = latest ? Number(latest.pricePerKg) : BASE_PRICES[cropType];
+  const crops = await cropsService.listAll();
+  for (const crop of crops) {
+    const latest = await pricesRepository.findLatestByCrop(crop.key);
+    const current = latest ? Number(latest.pricePerKg) : Number(crop.basePrice);
     const drift = 1 + (Math.random() * 0.06 - 0.03);
     const next = Math.max(0.5, Math.round(current * drift * 100) / 100);
-    await pricesRepository.createSnapshot(cropType, next);
+    await pricesRepository.createSnapshot(crop.key, next);
   }
   logger.info('[prices] tick complete — all crop prices refreshed');
 }

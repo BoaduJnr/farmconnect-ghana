@@ -1,11 +1,7 @@
-import {
-  CROPS,
-  type CreateListingInput,
-  type ListingSearchInput,
-  ListingStatus,
-  type UpdateListingInput,
-} from '@farmconnect/shared';
+import type { CreateListingInput, ListingSearchInput, UpdateListingInput } from '@farmconnect/shared';
+import { ListingStatus } from '@farmconnect/shared';
 import * as coopsService from '../coops/coops.service.js';
+import * as cropsService from '../crops/crops.service.js';
 import { haversineDistanceKm } from '../../lib/geo.js';
 import { findUserById } from '../users/users.repository.js';
 import * as listingsRepository from './listings.repository.js';
@@ -31,30 +27,40 @@ export class FarmerMomoNotSetupError extends Error {
   }
 }
 
+export class InvalidCropTypeError extends Error {
+  constructor() {
+    super('Unknown or unavailable crop type');
+    this.name = 'InvalidCropTypeError';
+  }
+}
+
 function farmerDisplayName(farmer: { name: string | null; phone: string }): string {
   return farmer.name ?? `Farmer •${farmer.phone.slice(-4)}`;
 }
 
-function serializeListing(listing: {
-  id: string;
-  cropType: string;
-  quantityKg: number;
-  pricePerKg: unknown;
-  harvestDate: Date | null;
-  availableFrom: Date;
-  photos: string[];
-  lat: number;
-  lng: number;
-  regionLabel: string;
-  status: string;
-  createdAt: Date;
-  farmerId: string;
-  coop?: { id: string; name: string } | null;
-}) {
+function serializeListing(
+  listing: {
+    id: string;
+    cropType: string;
+    quantityKg: number;
+    pricePerKg: unknown;
+    harvestDate: Date | null;
+    availableFrom: Date;
+    photos: string[];
+    lat: number;
+    lng: number;
+    regionLabel: string;
+    status: string;
+    createdAt: Date;
+    farmerId: string;
+    coop?: { id: string; name: string } | null;
+  },
+  cropsByKey: Map<string, { emoji: string }>,
+) {
   return {
     id: listing.id,
     cropType: listing.cropType,
-    emoji: CROPS[listing.cropType as keyof typeof CROPS]?.emoji ?? '🌱',
+    emoji: cropsByKey.get(listing.cropType)?.emoji ?? '🌱',
     quantityKg: listing.quantityKg,
     pricePerKg: Number(listing.pricePerKg),
     harvestDate: listing.harvestDate,
@@ -76,23 +82,35 @@ export async function create(farmerId: string, input: CreateListingInput) {
     throw new FarmerMomoNotSetupError();
   }
 
+  const activeKeys = await cropsService.listActiveKeys();
+  if (!activeKeys.has(input.cropType)) {
+    throw new InvalidCropTypeError();
+  }
+
   const coopId = input.sellAsCoop ? await coopsService.getMyCoopId(farmerId) : null;
   const listing = await listingsRepository.createListing(farmerId, input, coopId);
-  return serializeListing(listing);
+  const cropsByKey = await cropsService.getByKeyMap();
+  return serializeListing(listing, cropsByKey);
 }
 
 export async function listMine(farmerId: string) {
-  const listings = await listingsRepository.findListingsByFarmer(farmerId);
-  return listings.map(serializeListing);
+  const [listings, cropsByKey] = await Promise.all([
+    listingsRepository.findListingsByFarmer(farmerId),
+    cropsService.getByKeyMap(),
+  ]);
+  return listings.map((l) => serializeListing(l, cropsByKey));
 }
 
 export async function getById(id: string) {
-  const listing = await listingsRepository.findListingById(id);
+  const [listing, cropsByKey] = await Promise.all([
+    listingsRepository.findListingById(id),
+    cropsService.getByKeyMap(),
+  ]);
   if (!listing) {
     throw new ListingNotFoundError();
   }
   return {
-    ...serializeListing(listing),
+    ...serializeListing(listing, cropsByKey),
     farmer: {
       id: listing.farmer.id,
       name: farmerDisplayName(listing.farmer),
@@ -117,7 +135,8 @@ export async function update(id: string, farmerId: string, input: UpdateListingI
   }
 
   const updated = await listingsRepository.updateListing(id, input);
-  return serializeListing(updated);
+  const cropsByKey = await cropsService.getByKeyMap();
+  return serializeListing(updated, cropsByKey);
 }
 
 export async function remove(id: string, farmerId: string) {
@@ -130,27 +149,29 @@ export async function remove(id: string, farmerId: string) {
   }
 
   const updated = await listingsRepository.updateListing(id, { status: ListingStatus.REMOVED });
-  return serializeListing(updated);
+  const cropsByKey = await cropsService.getByKeyMap();
+  return serializeListing(updated, cropsByKey);
 }
 
 export async function search(params: ListingSearchInput) {
   const cropTypes = params.category
-    ? (Object.keys(CROPS) as (keyof typeof CROPS)[]).filter(
-        (key) => CROPS[key].category === params.category,
-      )
+    ? await cropsService.keysByCategory(params.category)
     : params.cropType
       ? [params.cropType]
       : undefined;
 
-  const rows = await listingsRepository.searchActiveListings({
-    cropTypes,
-    q: params.q,
-    minPrice: params.minPrice,
-    maxPrice: params.maxPrice,
-  });
+  const [rows, cropsByKey] = await Promise.all([
+    listingsRepository.searchActiveListings({
+      cropTypes,
+      q: params.q,
+      minPrice: params.minPrice,
+      maxPrice: params.maxPrice,
+    }),
+    cropsService.getByKeyMap(),
+  ]);
 
   let results = rows.map((row) => {
-    const base = serializeListing(row);
+    const base = serializeListing(row, cropsByKey);
     const distanceKm =
       params.lat !== undefined && params.lng !== undefined
         ? haversineDistanceKm({ lat: params.lat, lng: params.lng }, { lat: row.lat, lng: row.lng })

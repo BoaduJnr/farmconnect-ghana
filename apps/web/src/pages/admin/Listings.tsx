@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { ListingStatus } from '@farmconnect/shared';
 import { AdminLayout } from '../../components/AdminLayout';
+import { useCrops } from '../../features/crops/useCrops';
 import { cropEmoji, cropName } from '../../lib/cropDisplay';
 import { listListings, setListingStatus } from '../../features/admin/api';
 
@@ -15,6 +16,7 @@ const STATUS_FILTERS: { label: string; value: ListingStatus | undefined }[] = [
 
 export default function AdminListings() {
   const queryClient = useQueryClient();
+  const { data: crops } = useCrops();
   const [statusFilter, setStatusFilter] = useState<ListingStatus | undefined>(undefined);
 
   const { data: listings, isLoading } = useQuery({
@@ -54,10 +56,10 @@ export default function AdminListings() {
         {listings?.map((l) => (
           <div key={l.id} className="flex items-center gap-3 rounded-2xl border border-[#ECF0E9] bg-white p-3.5">
             <div className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-bg text-xl">
-              {cropEmoji(l.cropType)}
+              {cropEmoji(crops, l.cropType)}
             </div>
             <div className="min-w-0 flex-1">
-              <div className="text-[14px] font-bold text-ink">{cropName(l.cropType, 'en')}</div>
+              <div className="text-[14px] font-bold text-ink">{cropName(crops, l.cropType, 'en')}</div>
               <div className="mt-0.5 text-[12px] text-muted">
                 {l.farmer.name ?? l.farmer.phone} · {l.regionLabel} · {l.status}
               </div>

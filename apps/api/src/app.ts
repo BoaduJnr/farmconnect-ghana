@@ -11,6 +11,7 @@ import { adminRouter } from './modules/admin/admin.routes.js';
 import { advisoryRouter } from './modules/advisory/advisory.routes.js';
 import { authRouter } from './modules/auth/auth.routes.js';
 import { coopsRouter } from './modules/coops/coops.routes.js';
+import { cropsRouter } from './modules/crops/crops.routes.js';
 import { listingsRouter } from './modules/listings/listings.routes.js';
 import { notificationsRouter } from './modules/notifications/notifications.routes.js';
 import { ordersRouter } from './modules/orders/orders.routes.js';
@@ -57,6 +58,7 @@ export function createApp() {
   app.use('/api/advisory', advisoryRouter);
   app.use('/api/auth', authRouter);
   app.use('/api/coops', coopsRouter);
+  app.use('/api/crops', cropsRouter);
   app.use('/api/listings', listingsRouter);
   app.use('/api/notifications', notificationsRouter);
   app.use('/api/orders', ordersRouter);

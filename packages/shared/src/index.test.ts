@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { CROPS, createListingSchema, listingSearchSchema, otpVerifySchema, phoneSchema, Role } from './index.js';
+import { createListingSchema, listingSearchSchema, otpVerifySchema, phoneSchema, Role } from './index.js';
 
 describe('@farmconnect/shared', () => {
   it('exposes the Role enum', () => {
@@ -38,8 +38,7 @@ describe('@farmconnect/shared', () => {
     expect(() => listingSearchSchema.parse({ category: 'nope' })).toThrow();
   });
 
-  it('has category metadata for every crop', () => {
-    expect(Object.keys(CROPS)).toHaveLength(10);
-    expect(CROPS.maize.category).toBe('grains');
-  });
+  // Crop metadata itself moved to the database (apps/api/src/modules/crops) so an admin can
+  // add crops without a redeploy — see crops.flow.test.ts for coverage of the seeded catalog
+  // and admin create/activate/deactivate behaviour.
 });

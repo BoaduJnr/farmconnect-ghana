@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
+import { useCrops } from '../../features/crops/useCrops';
 import { cropEmoji, cropName } from '../../lib/cropDisplay';
 import { getListingById } from '../../features/listings/api';
 
@@ -8,6 +9,7 @@ export default function ListingDetail() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { id } = useParams<{ id: string }>();
+  const { data: crops } = useCrops();
 
   const { data: listing, isLoading } = useQuery({
     queryKey: ['listings', 'detail', id],
@@ -30,11 +32,11 @@ export default function ListingDetail() {
         </button>
         <div className="flex items-center gap-[18px]">
           <div className="flex h-[84px] w-[84px] flex-none items-center justify-center rounded-[22px] bg-white/15 text-[46px]">
-            {cropEmoji(listing.cropType)}
+            {cropEmoji(crops, listing.cropType)}
           </div>
           <div>
             <div className="flex items-center gap-2 text-2xl font-extrabold">
-              {cropName(listing.cropType, i18n.language)}
+              {cropName(crops, listing.cropType, i18n.language)}
               {listing.coop && (
                 <span className="rounded-full bg-white/20 px-2.5 py-0.5 text-[11px] font-bold">
                   {listing.coop.name}

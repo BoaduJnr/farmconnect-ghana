@@ -1,7 +1,12 @@
 import type { Request, Response } from 'express';
 import type { CreateListingInput, ListingSearchInput, UpdateListingInput } from '@farmconnect/shared';
 import * as listingsService from './listings.service.js';
-import { FarmerMomoNotSetupError, ListingNotFoundError, NotListingOwnerError } from './listings.service.js';
+import {
+  FarmerMomoNotSetupError,
+  InvalidCropTypeError,
+  ListingNotFoundError,
+  NotListingOwnerError,
+} from './listings.service.js';
 
 export async function create(req: Request, res: Response) {
   const input = req.body as CreateListingInput;
@@ -9,7 +14,7 @@ export async function create(req: Request, res: Response) {
     const listing = await listingsService.create(req.user!.id, input);
     res.status(201).json({ listing });
   } catch (err) {
-    if (err instanceof FarmerMomoNotSetupError) {
+    if (err instanceof FarmerMomoNotSetupError || err instanceof InvalidCropTypeError) {
       res.status(400).json({ error: err.message });
       return;
     }

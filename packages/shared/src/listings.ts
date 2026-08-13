@@ -1,12 +1,14 @@
 import { z } from 'zod';
-import { cropCategorySchema, cropTypeSchema } from './crops.js';
+import { cropCategorySchema } from './crops.js';
 import { ListingStatus } from './enums.js';
 
 const latSchema = z.coerce.number().min(-90).max(90);
 const lngSchema = z.coerce.number().min(-180).max(180);
 
 export const createListingSchema = z.object({
-  cropType: cropTypeSchema,
+  // Was a fixed Zod enum; crops are now DB-backed (see crops.ts), so this only checks shape —
+  // listings.service.ts rejects an unknown/inactive key at the service layer.
+  cropType: z.string().min(1).max(30),
   quantityKg: z.coerce.number().int().positive(),
   pricePerKg: z.coerce.number().positive(),
   harvestDate: z.coerce.date().optional(),
@@ -26,7 +28,7 @@ export const updateListingSchema = createListingSchema
 export type UpdateListingInput = z.infer<typeof updateListingSchema>;
 
 export const listingSearchSchema = z.object({
-  cropType: cropTypeSchema.optional(),
+  cropType: z.string().min(1).max(30).optional(),
   category: cropCategorySchema.optional(),
   q: z.string().max(100).optional(),
   minPrice: z.coerce.number().nonnegative().optional(),

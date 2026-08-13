@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { Role } from '@farmconnect/shared';
 import { createApp } from '../../app.js';
 import { prisma } from '../../lib/prisma.js';
+import { ensureSeeded as ensureCropsSeeded, listAll as listAllCrops } from '../crops/crops.service.js';
 import { uniqueTestPhone } from '../../test-utils/phone.js';
 import { ensureSeeded, runPriceTick } from './prices.service.js';
 
@@ -11,8 +12,11 @@ const phone = uniqueTestPhone('291');
 
 describe('prices flow (integration, real Postgres + Redis)', () => {
   let token: string;
+  let cropCount: number;
 
   beforeAll(async () => {
+    await ensureCropsSeeded();
+    cropCount = (await listAllCrops()).length;
     await ensureSeeded();
 
     const otpRes = await request(app).post('/api/auth/otp/request').send({ phone });
@@ -34,10 +38,10 @@ describe('prices flow (integration, real Postgres + Redis)', () => {
     expect(res.status).toBe(401);
   });
 
-  it('returns a price row for all 10 crops', async () => {
+  it('returns a price row for every seeded crop', async () => {
     const res = await request(app).get('/api/prices').set('Authorization', `Bearer ${token}`);
     expect(res.status).toBe(200);
-    expect(res.body.prices).toHaveLength(10);
+    expect(res.body.prices).toHaveLength(cropCount);
     expect(res.body.prices[0]).toMatchObject({
       cropType: expect.any(String),
       emoji: expect.any(String),

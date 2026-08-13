@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { cropCategorySchema, cropKeySchema } from './crops.js';
 import { ListingStatus, Role } from './enums.js';
 
 /** Admin account verification / suspension (FR-13: "verify buyer/farmer accounts"). */
@@ -28,3 +29,22 @@ export const adminSetListingStatusSchema = z.object({
   status: z.enum([ListingStatus.ACTIVE, ListingStatus.REMOVED]),
 });
 export type AdminSetListingStatusInput = z.infer<typeof adminSetListingStatusSchema>;
+
+/** Admin adds a new listable crop type (no redeploy needed — see crops.service.ts). `key` is
+ * the stable slug other records reference; if omitted, the server derives one from labelEn. */
+export const createCropSchema = z.object({
+  key: cropKeySchema.optional(),
+  emoji: z.string().min(1).max(8),
+  category: cropCategorySchema,
+  labelEn: z.string().min(1).max(40),
+  labelTw: z.string().min(1).max(40),
+  basePrice: z.coerce.number().positive(),
+});
+export type CreateCropInput = z.infer<typeof createCropSchema>;
+
+/** Retiring a crop from the picker/marketplace without deleting historical listings/orders
+ * that still reference it. */
+export const setCropActiveSchema = z.object({
+  isActive: z.boolean(),
+});
+export type SetCropActiveInput = z.infer<typeof setCropActiveSchema>;

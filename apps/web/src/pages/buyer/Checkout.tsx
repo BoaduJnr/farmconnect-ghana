@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { PrimaryButton } from '../../components/PrimaryButton';
+import { useCrops } from '../../features/crops/useCrops';
 import { cropEmoji, cropName } from '../../lib/cropDisplay';
 import { MOMO_PROVIDER_LABELS } from '../../lib/momoDisplay';
 import { getListingById } from '../../features/listings/api';
@@ -14,6 +15,7 @@ export default function Checkout() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const { listingId } = useParams<{ listingId: string }>();
+  const { data: crops } = useCrops();
 
   const [quantityKg, setQuantityKg] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -52,10 +54,10 @@ export default function Checkout() {
 
       <div className="mb-5 flex items-center gap-3.5 rounded-2xl border border-[#ECF0E9] bg-white p-4">
         <div className="flex h-12 w-12 flex-none items-center justify-center rounded-xl bg-bg text-2xl">
-          {cropEmoji(listing.cropType)}
+          {cropEmoji(crops, listing.cropType)}
         </div>
         <div className="flex-1">
-          <div className="font-bold text-ink">{cropName(listing.cropType, i18n.language)}</div>
+          <div className="font-bold text-ink">{cropName(crops, listing.cropType, i18n.language)}</div>
           <div className="text-xs text-muted">
             {listing.quantityKg} kg {t('availableQty')} · ₵{listing.pricePerKg}/kg
           </div>

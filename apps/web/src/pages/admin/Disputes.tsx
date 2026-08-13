@@ -1,11 +1,13 @@
 import { useState } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { AdminLayout } from '../../components/AdminLayout';
+import { useCrops } from '../../features/crops/useCrops';
 import { cropEmoji, cropName } from '../../lib/cropDisplay';
 import { listDisputedOrders, resolveDispute } from '../../features/admin/api';
 
 export default function AdminDisputes() {
   const queryClient = useQueryClient();
+  const { data: crops } = useCrops();
   const [notes, setNotes] = useState<Record<string, string>>({});
 
   const { data: orders, isLoading } = useQuery({
@@ -30,11 +32,11 @@ export default function AdminDisputes() {
           <div key={o.id} className="rounded-2xl border border-[#ECF0E9] bg-white p-4">
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 flex-none items-center justify-center rounded-xl bg-bg text-xl">
-                {cropEmoji(o.cropType)}
+                {cropEmoji(crops, o.cropType)}
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-[14.5px] font-bold text-ink">
-                  {cropName(o.cropType, 'en')} · ₵{o.total.toFixed(2)}
+                  {cropName(crops, o.cropType, 'en')} · ₵{o.total.toFixed(2)}
                 </div>
                 <div className="mt-0.5 text-[12px] text-muted">Order {o.id.slice(-6)}</div>
               </div>

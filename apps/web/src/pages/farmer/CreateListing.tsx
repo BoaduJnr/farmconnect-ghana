@@ -1,20 +1,20 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { CROPS, type CropType } from '@farmconnect/shared';
+import type { CropType } from '@farmconnect/shared';
 import { PrimaryButton } from '../../components/PrimaryButton';
 import { getMyCoop } from '../../features/coops/api';
+import { useCrops } from '../../features/crops/useCrops';
 import { createListing, uploadPhoto } from '../../features/listings/api';
 import { useGeolocation } from '../../lib/useGeolocation';
-
-const CROP_OPTIONS = Object.keys(CROPS) as CropType[];
 
 export default function CreateListing() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const geo = useGeolocation();
+  const { data: crops } = useCrops();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [cropType, setCropType] = useState<CropType>('maize');
@@ -24,6 +24,15 @@ export default function CreateListing() {
   const [photos, setPhotos] = useState<string[]>([]);
   const [uploading, setUploading] = useState(false);
   const [sellAsCoop, setSellAsCoop] = useState(false);
+
+  // Once the crop list loads, make sure the selected value is actually one of the active
+  // crops -- 'maize' is virtually always present (seeded by default), but this keeps the form
+  // correct even if an admin ever deactivates it.
+  useEffect(() => {
+    if (crops && crops.length > 0 && !crops.some((c) => c.key === cropType)) {
+      setCropType(crops[0].key);
+    }
+  }, [crops, cropType]);
 
   const { data: coop } = useQuery({ queryKey: ['coops', 'mine'], queryFn: getMyCoop });
 
@@ -84,9 +93,9 @@ export default function CreateListing() {
         onChange={(e) => setCropType(e.target.value as CropType)}
         className="mb-[18px] h-[54px] w-full appearance-none rounded-2xl border-[1.5px] border-[#E1E8DE] bg-white px-3.5 text-[15px] font-semibold text-ink outline-none focus:border-brand"
       >
-        {CROP_OPTIONS.map((key) => (
-          <option key={key} value={key}>
-            {CROPS[key][i18n.language === 'tw' ? 'tw' : 'en']}
+        {crops?.map((crop) => (
+          <option key={crop.key} value={crop.key}>
+            {crop.emoji} {i18n.language === 'tw' ? crop.labelTw : crop.labelEn}
           </option>
         ))}
       </select>

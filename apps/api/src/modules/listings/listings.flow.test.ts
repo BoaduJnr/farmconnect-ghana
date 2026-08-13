@@ -68,7 +68,10 @@ describe('listings flow (integration, real Postgres + Redis)', () => {
       .post('/api/listings')
       .set('Authorization', `Bearer ${farmerToken}`)
       .send({
-        cropType: 'durian',
+        // Deliberately not a real word in any language, plus a namespaced suffix — guards
+        // against collision with any admin-added crop, including the throwaway one
+        // crops.flow.test.ts creates and cleans up in the same shared test database.
+        cropType: 'zzz_test_definitely_not_a_real_crop',
         quantityKg: 200,
         pricePerKg: 4.5,
         lat: 6.6885,

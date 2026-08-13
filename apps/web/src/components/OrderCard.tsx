@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { OrderStatus, Role } from '@farmconnect/shared';
+import { useCrops } from '../features/crops/useCrops';
 import { cropEmoji, cropName } from '../lib/cropDisplay';
 import { confirmDelivery, confirmPayment, raiseDispute, rejectPayment } from '../features/orders/api';
 import type { Order } from '../features/orders/types';
@@ -19,6 +20,7 @@ export function OrderCard({ order, role }: Readonly<OrderCardProps>) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const { data: crops } = useCrops();
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [rejectNote, setRejectNote] = useState('');
   const [showDisputeForm, setShowDisputeForm] = useState(false);
@@ -75,10 +77,10 @@ export function OrderCard({ order, role }: Readonly<OrderCardProps>) {
     <div className="rounded-2xl border border-[#ECF0E9] bg-white p-4">
       <div className="flex items-center gap-3.5">
         <div className="flex h-[50px] w-[50px] flex-none items-center justify-center rounded-2xl bg-bg text-2xl">
-          {cropEmoji(order.cropType)}
+          {cropEmoji(crops, order.cropType)}
         </div>
         <div className="min-w-0 flex-1">
-          <div className="text-[15.5px] font-bold text-ink">{cropName(order.cropType, i18n.language)}</div>
+          <div className="text-[15.5px] font-bold text-ink">{cropName(crops, order.cropType, i18n.language)}</div>
           <div className="font-num mt-0.5 text-[12.5px] text-[#7c887f]">
             {order.quantityKg} kg · ₵{order.total.toFixed(2)}
           </div>

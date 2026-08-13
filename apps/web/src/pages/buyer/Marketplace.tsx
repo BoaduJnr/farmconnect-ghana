@@ -5,21 +5,26 @@ import { useQuery } from '@tanstack/react-query';
 import { CROP_CATEGORY_KEYS, type CropCategory } from '@farmconnect/shared';
 import { AppShell } from '../../components/AppShell';
 import { cropName } from '../../lib/cropDisplay';
+import { useCrops } from '../../features/crops/useCrops';
 import { searchListings } from '../../features/listings/api';
 import { useGeolocation } from '../../lib/useGeolocation';
 
 const CATEGORY_LABEL_KEYS: Record<'all' | CropCategory, string> = {
   all: 'catAll',
   grains: 'catGrains',
-  veg: 'catVeg',
-  fruits: 'catFruits',
+  legumes: 'catLegumes',
   tubers: 'catTubers',
+  veg: 'catVeg',
+  leafygreens: 'catLeafyGreens',
+  fruits: 'catFruits',
+  cashcrops: 'catCashCrops',
 };
 
 export default function Marketplace() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const geo = useGeolocation();
+  const { data: crops } = useCrops();
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState<'all' | CropCategory>('all');
 
@@ -86,7 +91,7 @@ export default function Marketplace() {
             </div>
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-1.5 text-base font-bold text-ink">
-                {cropName(listing.cropType, i18n.language)}
+                {cropName(crops, listing.cropType, i18n.language)}
                 {listing.coop && (
                   <span className="rounded-full bg-brand-surface px-2 py-0.5 text-[10px] font-bold text-brand">
                     {listing.coop.name}

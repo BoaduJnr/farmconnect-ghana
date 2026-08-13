@@ -3,19 +3,26 @@ import type {
   AdminListListingsQuery,
   AdminListUsersQuery,
   AdminSetListingStatusInput,
+  CreateCropInput,
   ResolveDisputeInput,
+  SetCropActiveInput,
   SetSuspendedInput,
   SetVerifiedInput,
 } from '@farmconnect/shared';
+import { CropAlreadyExistsError, CropNotFoundError } from '../crops/crops.service.js';
 import { InvalidOrderStateError, OrderNotFoundError } from '../orders/orders.service.js';
 import * as adminService from './admin.service.js';
 
 function handleKnownErrors(err: unknown, res: Response): boolean {
-  if (err instanceof OrderNotFoundError) {
+  if (err instanceof OrderNotFoundError || err instanceof CropNotFoundError) {
     res.status(404).json({ error: err.message });
     return true;
   }
   if (err instanceof InvalidOrderStateError) {
+    res.status(409).json({ error: err.message });
+    return true;
+  }
+  if (err instanceof CropAlreadyExistsError) {
     res.status(409).json({ error: err.message });
     return true;
   }
@@ -62,6 +69,31 @@ export async function resolveDispute(req: Request, res: Response) {
   try {
     const order = await adminService.resolveDispute(req.params.id, resolution, note);
     res.status(200).json({ order });
+  } catch (err) {
+    if (!handleKnownErrors(err, res)) throw err;
+  }
+}
+
+export async function listCrops(_req: Request, res: Response) {
+  const crops = await adminService.listCrops();
+  res.status(200).json({ crops });
+}
+
+export async function createCrop(req: Request, res: Response) {
+  const input = req.body as CreateCropInput;
+  try {
+    const crop = await adminService.createCrop(input);
+    res.status(201).json({ crop });
+  } catch (err) {
+    if (!handleKnownErrors(err, res)) throw err;
+  }
+}
+
+export async function setCropActive(req: Request, res: Response) {
+  const { isActive } = req.body as SetCropActiveInput;
+  try {
+    const crop = await adminService.setCropActive(req.params.key, isActive);
+    res.status(200).json({ crop });
   } catch (err) {
     if (!handleKnownErrors(err, res)) throw err;
   }

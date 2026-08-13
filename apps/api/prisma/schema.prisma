@@ -247,6 +247,28 @@ model ChatMessage {
   @@map("chat_messages")
 }
 
+// The catalog of listable produce types. Seeded with a curated set of Ghanaian crops at
+// startup (see crops.service.ts) but deliberately NOT a fixed enum -- an admin can add more
+// through the admin portal without a redeploy. `key` is the stable slug referenced by
+// Listing.cropType / Order.cropType / PriceSnapshot.cropType (loose reference, not a DB FK,
+// matching this schema's existing style of keeping those as plain strings). `isActive` lets a
+// crop be retired from the picker/marketplace without deleting historical listings/orders that
+// still reference it.
+model Crop {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  emoji     String
+  category  String
+  labelEn   String
+  labelTw   String
+  basePrice Decimal  @db.Decimal(10, 2)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("crops")
+}
+
 // Seeded/simulated — no public Ghana Commodity Exchange API actually exists to integrate
 // with (see plan). A background tick perturbs prices periodically so this stays "live".
 model PriceSnapshot {
@@ -272,7 +294,11 @@ enum NotificationChannel {
 
 model Notification {
   id        String              @id @default(cuid())
-  user      User                @relation(fields: [userId], references: [id])
+  // Cascade: a broadcast action (e.g. an admin activating/deactivating a crop) notifies every
+  // farmer, so any farmer's notification history can now reference a user that later gets
+  // hard-deleted (test cleanup today; conceivably a real account-deletion flow later) — without
+  // this, that delete fails on the FK instead of just cleaning up the orphaned notifications.
+  user      User                @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId    String
   type      NotificationType
   channel   NotificationChannel @default(IN_APP)

@@ -1,11 +1,13 @@
 import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { AppShell } from '../components/AppShell';
+import { useCrops } from '../features/crops/useCrops';
 import { cropName } from '../lib/cropDisplay';
 import { getPrices } from '../features/prices/api';
 
 export default function Prices() {
   const { t, i18n } = useTranslation();
+  const { data: crops } = useCrops();
 
   const { data: prices, isLoading } = useQuery({
     queryKey: ['prices'],
@@ -31,7 +33,7 @@ export default function Prices() {
               </div>
               <div className="min-w-0 flex-1">
                 <div className="text-[15px] font-bold text-ink">
-                  {cropName(row.cropType, i18n.language)}
+                  {cropName(crops, row.cropType, i18n.language)}
                 </div>
                 <div className="font-num mt-0.5 text-[13px] text-[#9aa69d]">
                   ₵{row.price.toFixed(2)} {t('perKg')}
