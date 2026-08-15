@@ -47,7 +47,13 @@ export function createApp() {
     // lib/redis.ts's checkRedisHealth() comment for why that distinction matters.
     redisOk = await checkRedisHealth();
 
-    const ok = db && redisOk;
+    // render.yaml sets healthCheckPath: /health, so THIS status code is what gates whether
+    // Render ever promotes a new deploy / routes traffic to it. Redis is a soft dependency now
+    // (lib/redis.ts falls back to in-memory storage), so it must never fail this gate -- doing
+    // so would mean that for as long as Upstash's monthly quota stays exhausted, no deploy could
+    // ever go live again, since the new instance would forever look "unhealthy" to Render.
+    // Postgres has no such fallback, so it remains the only thing that fails the check.
+    const ok = db;
     res.status(ok ? 200 : 503).json({ status: ok ? 'ok' : 'degraded', db, redis: redisOk });
   });
 
