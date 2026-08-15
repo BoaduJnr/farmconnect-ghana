@@ -4,7 +4,7 @@ import { pinoHttp } from 'pino-http';
 import { env } from './config/env.js';
 import { logger } from './lib/logger.js';
 import { prisma } from './lib/prisma.js';
-import { redis } from './lib/redis.js';
+import { checkRedisHealth } from './lib/redis.js';
 import { errorMiddleware } from './middleware/error.middleware.js';
 import { requireAuth } from './middleware/auth.middleware.js';
 import { adminRouter } from './modules/admin/admin.routes.js';
@@ -43,11 +43,9 @@ export function createApp() {
       logger.error({ err }, 'Postgres health check failed');
     }
 
-    try {
-      redisOk = (await redis.ping()) === 'PONG';
-    } catch (err) {
-      logger.error({ err }, 'Redis health check failed');
-    }
+    // Tests the real backend directly (not the resilient facade feature code uses) -- see
+    // lib/redis.ts's checkRedisHealth() comment for why that distinction matters.
+    redisOk = await checkRedisHealth();
 
     const ok = db && redisOk;
     res.status(ok ? 200 : 503).json({ status: ok ? 'ok' : 'degraded', db, redis: redisOk });
